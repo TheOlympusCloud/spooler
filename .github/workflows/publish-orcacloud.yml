@@ -1,4 +1,15 @@
-name: Publish to OrcaCloud
+name: Publish to Orca Cloud
+
+# Publishing a GitHub release publishes that version to Orca Cloud.
+#
+# The usual flow: push a tag like v0.9.2 (release.yml tests, builds every OS and
+# opens a DRAFT release), review the draft, click "Publish release" - which runs
+# this workflow.
+#
+# No secrets are needed: the repository is connected to the plugin on Orca Cloud
+# (Edit plugin > GitHub publishing) and this run proves where it comes from with a
+# short-lived OIDC token signed by GitHub. Orca Cloud only accepts tokens from runs
+# triggered by a published release, so this does not run on a tag push.
 
 on:
   release:
@@ -9,12 +20,10 @@ permissions:
   contents: read
 
 env:
-  # Space-separated globs of the plugin files to upload (.whl / .py).
-  PLUGIN_FILES: "dist/*.py"
+  TAG: ${{ github.event.release.tag_name }}
 
 jobs:
   publish:
-    if: vars.ORCACLOUD_PUBLISH == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -23,33 +32,44 @@ jobs:
           python-version: "3.12"
 
       - name: Check the tag matches the plugin version
-        run: python scripts/check_version.py "$GITHUB_REF_NAME"
+        run: python scripts/check_version.py "$TAG"
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests
 
       - name: Build the plugin for every OS
         run: python scripts/build.py
 
-      - name: Publish release to OrcaCloud
+      - name: Changelog section for this version
+        run: |
+          awk -v v="${TAG#v}" '
+            /^## \[/ { if (found) exit; found = index($0, "[" v "]") > 0; next }
+            found { print }
+          ' CHANGELOG.md | sed '/./,$!d' > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error::CHANGELOG.md has no section for ${TAG#v}"
+            exit 1
+          fi
+
+      - name: Publish to Orca Cloud
         run: |
           set -euo pipefail
           oidc_token="$(curl -sS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=orcacloud" | jq -r .value)"
-          version="${GITHUB_REF_NAME#v}"
-          changelog="$(jq -r '.release.body // ""' "$GITHUB_EVENT_PATH" | head -c 4000)"
-          metadata="$(jq -cn --arg version "$version" --arg changelog "$changelog" \
-            '{version: $version} + (if $changelog == "" then {} else {changelog: $changelog} end)')"
-          args=(--form-string "metadata=$metadata")
-          shopt -s nullglob
-          for file in $PLUGIN_FILES; do
+          metadata="$(jq -cn --arg version "${TAG#v}" --rawfile changelog notes.md \
+            '{version: $version, changelog: ($changelog | .[0:4000])}')"
+          args=(-F "metadata=$metadata")
+          for file in dist/*.py; do
             args+=(-F "files=@$file")
           done
-          if [ "${#args[@]}" -eq 1 ]; then
-            echo "No plugin files matched: $PLUGIN_FILES" >&2
-            exit 1
-          fi
           status="$(curl -sS -o response.json -w '%{http_code}' \
             -H "Authorization: Bearer $oidc_token" \
             "${args[@]}" \
             https://api.orcaslicer.com/api/v1/plugin-publish/releases)"
           cat response.json
           echo
-          [ "$status" = "201" ]
+          if [ "$status" != "201" ]; then
+            echo "::error::Orca Cloud returned HTTP $status (401: repository not connected to the plugin; version error: tag not higher than the current plugin version)"
+            exit 1
+          fi
+          echo "Published $TAG to Orca Cloud." >> "$GITHUB_STEP_SUMMARY"
