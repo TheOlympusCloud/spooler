@@ -18,6 +18,7 @@ import logging
 import os
 import platform
 import re
+import shutil
 import socket
 import ssl
 import struct
@@ -25,6 +26,7 @@ import sys
 import tempfile
 import threading
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -635,7 +637,10 @@ MATERIAL_ALIASES = {
 }
 BED_TEMP_KEYS = ("hot_plate_temp", "hot_plate_temp_initial_layer",
                  "textured_plate_temp", "textured_plate_temp_initial_layer")
-_profiles: dict = {"hash": "", "names": {}, "error": "", "count": 0}
+PROFILE_RETRY = 300  # seconds before a refused set of presets is offered again
+_profiles: dict = {"names": {}, "error": "", "count": 0, "failed": ("", 0.0)}
+_profile_lock = threading.Lock()
+_ui_snap: dict = {}
 
 
 def _material_key(material: object) -> str:
@@ -651,12 +656,19 @@ def profile_parent(vendor: str, material: str, names: set[str]) -> str:
         if candidate.strip() and candidate in names:
             return candidate
     base = alias.split()[0].split("-")[0] if alias else ""
-    candidate = f"Generic {base} @System"
-    return candidate if candidate in names else PROFILE_FALLBACK
+    for candidate in (f"Generic {base} @System", PROFILE_FALLBACK):
+        if candidate in names:
+            return candidate
+    return ""
+
+
+WINDOWS_RESERVED = re.compile(r"(CON|PRN|AUX|NUL|COM\d|LPT\d)(\..*)?", re.I)
 
 
 def _safe_name(text: str) -> str:
-    return re.sub(r"\s+", " ", re.sub(r'[\\/:*?"<>|;]', " ", text)).strip()[:80]
+    name = re.sub(r'[\x00-\x1f\\/:*?"<>|;]', " ", unicodedata.normalize("NFC", text))
+    name = re.sub(r"\s+", " ", name).strip(" .")[:80]
+    return f"_{name}" if WINDOWS_RESERVED.fullmatch(name) else name
 
 
 def profile_name(filament: dict) -> str:
@@ -727,20 +739,33 @@ def stocked_filaments(spools: list[dict]) -> list[dict]:
     return [seen[key] for key in sorted(seen, key=lambda k: str(k).zfill(12))]
 
 
-def profile_files(spools: list[dict], names: set[str]) -> tuple[dict, dict]:
-    """({file name: preset dict}, {filament id: preset name}) for every stocked filament."""
-    files: dict = {}
+def profile_names(spools: list[dict]) -> dict:
+    """{filament id: preset name} for every stocked filament, unique ignoring case."""
     by_id: dict = {}
     taken: set[str] = set()
     for filament in stocked_filaments(spools):
         name = profile_name(filament)
-        if name.lower() in taken:
+        if name.casefold() in taken:
             name = f"{name} #{filament['id']}"
-        taken.add(name.lower())
+        taken.add(name.casefold())
+        by_id[filament["id"]] = name
+    return by_id
+
+
+def profile_files(spools: list[dict], names: set[str]) -> tuple[dict, dict]:
+    """({file name: preset dict}, {filament id: preset name}). A filament whose parent preset
+    OrcaSlicer doesn't have is left out, because one bad preset makes it refuse the bundle."""
+    files: dict = {}
+    by_id: dict = {}
+    filaments = {f["id"]: f for f in stocked_filaments(spools)}
+    for fid, name in profile_names(spools).items():
+        filament = filaments[fid]
         vendor = str((filament.get("vendor") or {}).get("name") or "").strip()
         parent = profile_parent(vendor, str(filament.get("material") or ""), names)
+        if not parent:
+            continue
         files[f"{name}.json"] = profile_preset(filament, name, parent)
-        by_id[filament["id"]] = name
+        by_id[fid] = name
     return files, by_id
 
 
@@ -751,75 +776,124 @@ def _orca_data_dir() -> Path | None:
     return DATA_DIR.parent if DATA_DIR.parent.name == "OrcaSlicer" else None
 
 
-def profile_user_folder(bundle) -> str:
-    """The signed-in account's preset folder, taken from where a user preset is stored."""
+def profile_user_folder(bundle, root: Path | None) -> str:
+    """The account's preset folder, from where a user preset is stored; "" when none is."""
     for collection in (bundle.filaments, bundle.prints, bundle.printers):
         for index in range(collection.size()):
-            parts = Path(collection.preset(index).file or "").parts
-            if "user" in parts and parts.index("user") + 1 < len(parts):
-                return parts[parts.index("user") + 1]
-    return "default"
+            path = Path(collection.preset(index).file or "")
+            try:
+                parts = path.relative_to(root / "user").parts if root else ()
+            except ValueError:
+                continue
+            if len(parts) > 1:
+                return parts[0]
+    return ""
 
 
 def profile_snapshot() -> dict | None:
-    """What profile_sync needs from the preset bundle. Call it on the UI thread."""
+    """What profile_sync and the Load action need from OrcaSlicer. Call it on the UI thread."""
     try:
         bundle = orca.host.preset_bundle()
-        return {"names": set(bundle.filaments.preset_names()), "folder": profile_user_folder(bundle)}
+        snap = {"names": set(bundle.filaments.preset_names()),
+                "folder": profile_user_folder(bundle, _orca_data_dir()),
+                "host": moon_base(bundle.full_config_value("print_host")),
+                "slots": len(bundle.current_filament_preset_names())}
     except Exception:
         log.exception("Could not read the filament presets")
         return None
+    _ui_snap.clear()
+    _ui_snap.update(snap)
+    return snap
 
 
 def _write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f".{path.name}.tmp")
+    tmp = path.with_name(f".{path.name}.{threading.get_ident()}.tmp")
     tmp.write_text(json.dumps(value, indent=2, ensure_ascii=False), encoding="utf-8")
     os.replace(tmp, path)
 
 
-def write_profiles(target: Path, files: dict) -> str:
-    """Make target/filament hold exactly these presets. Returns the new hash, or "" if unchanged."""
-    digest = hashlib.sha256(json.dumps(files, sort_keys=True).encode("utf-8")).hexdigest()
-    state_file = target / PROFILE_STATE
+def profile_digest(files: dict) -> str:
+    return hashlib.sha256(json.dumps(files, sort_keys=True).encode("utf-8")).hexdigest()
+
+
+def synced_digest(target: Path) -> str:
     try:
-        if json.loads(state_file.read_text(encoding="utf-8")).get("hash") == digest:
-            return ""
+        return str(json.loads((target / PROFILE_STATE).read_text(encoding="utf-8")).get("hash") or "")
     except (OSError, ValueError, AttributeError):
-        pass
+        return ""
+
+
+def write_profiles(target: Path, files: dict) -> None:
+    """Make target/filament hold exactly these presets."""
     folder = target / "filament"
     for name, preset in files.items():
         _write_json(folder / name, preset)
+    keep = {name.casefold() for name in files}
     for old in folder.glob("*.json"):
-        if old.name not in files:
+        if old.name.casefold() not in keep:
             old.unlink()
     _write_json(target / "bundle_metadata.json",
                 {"id": PROFILE_BUNDLE, "name": f"{PLUGIN_NAME} (Spoolman)", "version": PLUGIN_VERSION})
-    return digest
+
+
+def profile_folders(root: Path, snapshot: dict) -> list[str]:
+    """Account folders to try: the one a user preset showed, else each one under user/."""
+    if snapshot.get("folder"):
+        return [snapshot["folder"]]
+    try:
+        found = sorted(p.name for p in (root / "user").iterdir() if p.is_dir() and p.name != "default")
+    except OSError:
+        found = []
+    return found + ["default"]
+
+
+def _install_profiles(root: Path, snapshot: dict, files: dict, digest: str) -> None:
+    """Write the bundle where OrcaSlicer reads it and reload it. Raises when it is refused."""
+    last = None
+    for folder in profile_folders(root, snapshot):
+        target = root / "user" / folder / "_local" / PROFILE_BUNDLE
+        if synced_digest(target) == digest:
+            return
+        fresh = not target.exists()
+        write_profiles(target, files)
+        try:
+            orca.host.preset.bundles.reload_local(PROFILE_BUNDLE)
+        except RuntimeError as exc:
+            last = exc
+            if "does not exist" not in str(exc):
+                raise
+            if fresh:
+                shutil.rmtree(target, ignore_errors=True)
+            continue  # Not the signed-in account's folder.
+        # Only after OrcaSlicer accepted the bundle, so a refused one is tried again.
+        _write_json(target / PROFILE_STATE, {"hash": digest})
+        log.info("Synced %d filament profiles from Spoolman into %s", len(files), folder)
+        return
+    raise last or RuntimeError("No OrcaSlicer user folder accepted the presets")
 
 
 def profile_sync(spools: list[dict], snapshot: dict | None) -> dict:
     """Write and hot-reload the Spoolman filament presets. Never raises."""
     if not snapshot:
         return dict(_profiles)
-    root = _orca_data_dir()
-    try:
-        if root is None:
-            raise RuntimeError("OrcaSlicer's data folder was not found")
+    with _profile_lock:
+        root = _orca_data_dir()
         files, by_id = profile_files(spools, snapshot["names"])
-        target = root / "user" / snapshot["folder"] / "_local" / PROFILE_BUNDLE
-        digest = write_profiles(target, files)
-        if digest:
-            orca.host.preset.bundles.reload_local(PROFILE_BUNDLE)
-            # Only after OrcaSlicer accepted the bundle, so a refused one is tried again.
-            _write_json(target / PROFILE_STATE, {"hash": digest})
-            log.info("Synced %d filament profiles from Spoolman", len(files))
-        _profiles.update(names=by_id, count=len(files), error="")
-        _report("Profile sync", None)
-    except Exception as exc:
-        _profiles["error"] = str(exc)
-        _report("Profile sync", str(exc), exc_info=True)
-    return dict(_profiles)
+        digest = profile_digest(files)
+        failed, when = _profiles["failed"]
+        if digest == failed and time.monotonic() - when < PROFILE_RETRY:
+            return dict(_profiles)
+        try:
+            if root is None:
+                raise RuntimeError("OrcaSlicer's data folder was not found")
+            _install_profiles(root, snapshot, files, digest)
+            _profiles.update(names=by_id, count=len(files), error="", failed=("", 0.0))
+            _report("Profile sync", None)
+        except Exception as exc:
+            _profiles.update(error=str(exc), failed=(digest, time.monotonic()))
+            _report("Profile sync", str(exc), exc_info=True)
+        return dict(_profiles)
 
 
 def load_spools_synced(snapshot: dict | None) -> dict:
@@ -893,7 +967,7 @@ def save_printers(value: object) -> None:
 def printer_state() -> dict:
     codes = read_codes()
     printers = [dict(p, has_code=p.get("kind") == "moonraker" or bool(codes.get(_code_key(p["id"]))))
-                for p in printers_cfg()]
+                for p in printers_cfg() if _live["links"].get(p["id"]) != "none"]
     live = any(p["ip"] and p["has_code"] for p in printers)
     return {"printers": printers, "live_ok": live, "usage": usage_state(), "progress": progress_settings()}
 
@@ -1278,7 +1352,7 @@ def _local_sync() -> bool:
                 _live["printers"].pop(pid, None)
     for pid, link in wanted.items():
         entry = _local.get(pid)
-        if entry and (entry["thread"].is_alive() or _live["links"].get(pid) == "auth"):
+        if entry and (entry["thread"].is_alive() or _live["links"].get(pid) in ("auth", "none")):
             continue
         stop = threading.Event()
         run = _moon_run if link.get("kind") == "moonraker" else _local_run
@@ -1387,15 +1461,16 @@ def head_tray(index: int, config: dict, detect: dict, spools: list[dict]) -> dic
     kind = str(_list_at(config.get("filament_type"), index) or "").strip()
     sub = str(_list_at(config.get("filament_sub_type"), index) or "").strip()
     vendor = str(_list_at(config.get("filament_vendor"), index) or "").strip()
-    rgba = str(_list_at(config.get("filament_color_rgba"), index) or "")
+    rgba = str(_list_at(config.get("filament_color_rgba"), index) or "").lstrip("#").upper()
     uid = _card_uid(_list_at((detect or {}).get("info"), index))
     tray = {"tag_uid": uid}
     spool = match_spool(tray, spools) if uid else None
-    if spool is None:
+    if spool is None and kind and rgba:
         found = match_spools({"preset": "", "vendor": vendor, "material": kind, "colour": rgba[:6]}, spools)
         spool = found[0] if found else None
     if spool is not None:
-        return _spool_tray(index, spool, tray_color=rgba or None, tag_uid=uid)
+        tray = _spool_tray(index, spool, tag_uid=uid)
+        return dict(tray, tray_color=rgba) if rgba else tray
     label = " ".join(part for part in (vendor, kind, "" if sub.upper() in ("", "NONE", "BASIC") else sub) if part)
     return {"id": str(index), "tray_type": kind, "tray_color": rgba, "tray_sub_brands": label,
             "tag_uid": uid, "remain": None, "spool_id": None, "profile": ""}
@@ -1425,20 +1500,34 @@ def moon_poll(base: str) -> tuple[dict, bool]:
     return moon_report(status, active, _spool_cache["spools"] or [])
 
 
+def is_moonraker(base: str) -> bool:
+    """True when the host answers like Moonraker. Raises URLError when it can't be reached."""
+    try:
+        info = _moon_get(base, "/server/info")
+    except (urllib.error.HTTPError, ValueError):
+        return False
+    return "klippy_state" in info or "moonraker_version" in info
+
+
 def _moon_run(pid: str, link: dict, stop: threading.Event) -> None:
     fails = 0
+    checked = False
     while _live_active() and not stop.is_set():
         try:
+            if not checked:
+                if not is_moonraker(link["ip"]):
+                    _live["links"][pid] = "none"
+                    log.info("%s is not a Moonraker printer, not reading it", link["name"])
+                    return
+                checked = True
+            # Every slot is reported each time (empty ones as {"id": n}), so nothing goes stale.
             doc, heads = moon_poll(link["ip"])
-            if heads:
-                # A toolhead printer reports every head each time, so drop what it no longer has.
-                with _live_lock:
-                    state = _live["printers"].get(pid)
-                    if state is not None:
-                        state["units"].clear()
+            if stop.is_set():
+                break
             live_apply(pid, link["name"], doc, link=pid)
             with _live_lock:
-                _live["printers"][pid]["heads"] = heads
+                if pid in _live["printers"]:
+                    _live["printers"][pid]["heads"] = heads
             _live["links"][pid] = "live"
             fails = 0
             _report(f"Printer {link['name']}", None)
@@ -2940,6 +3029,7 @@ MAIN_PAGE = """
 
   <script>
     const statusEl = document.getElementById("status");
+    let profileNote = {};
     const listEl = document.getElementById("list");
     const searchEl = document.getElementById("search");
     const materialEl = document.getElementById("material-filter");
@@ -4032,9 +4122,11 @@ MAIN_PAGE = """
         }
         return true;
       });
-      statusEl.className = "";
+      statusEl.className = profileNote.error ? "error" : "";
       statusEl.textContent = filtered.length + " of " + allSpools.length + " spool" +
-        (allSpools.length === 1 ? "" : "s");
+        (allSpools.length === 1 ? "" : "s") + (profileNote.error
+          ? " \u00b7 OrcaSlicer presets not updated: " + profileNote.error
+          : profileNote.count ? " \u00b7 " + profileNote.count + " OrcaSlicer filament presets" : "");
       filtered.sort(function (a, b) {
         return compareSpools(a, b, sortKeyEl.value, sortDir) ||
           (sortKeyEl.value === "plate" ? compareSpools(a, b, "remaining", "asc") : 0);
@@ -4059,6 +4151,7 @@ MAIN_PAGE = """
         return;
       }
       allSpools = payload.spools || [];
+      if (payload.profiles) profileNote = payload.profiles;
       computeDupes();
       if (typeof payload.low_stock_grams === "number") lowStockGrams = payload.low_stock_grams;
       if (typeof payload.weight_display === "string") wMode = payload.weight_display;
@@ -5667,11 +5760,7 @@ if _SLICING:
 
 
 def printer_trays(base: str) -> list[dict]:
-    """The selected printer's slots in slicer order, each with its matched profile."""
-    result = get_spools(get_settings().get("spoolman_url", ""))
-    if not result["ok"]:
-        raise RuntimeError(result["error"])
-    _profiles["names"].update(profile_files(result["spools"], set())[1])
+    """The printer's slots in slicer order, each with its matched profile."""
     doc, heads = moon_poll(base)
     report = doc["print"]
     return report["ams"]["ams"][0]["tray"] if heads else [report["vt_tray"]]
@@ -5691,30 +5780,57 @@ def slot_plan(trays: list[dict], slots: int, names: set[str]) -> tuple[list, lis
     return plan, missing
 
 
+def load_printer_filaments(snap: dict) -> str:
+    """Select the matching profile for each plate slot. Runs on the Script worker."""
+    if not snap:
+        raise RuntimeError(f"Open the {PLUGIN_NAME} tab once, then run this again.")
+    if not snap.get("host"):
+        raise RuntimeError("The selected printer preset has no host address.")
+    result = get_spools(get_settings().get("spoolman_url", ""))
+    if not result["ok"]:
+        raise RuntimeError(result["error"])
+    state = profile_sync(result["spools"], snap)
+    if state["error"]:
+        raise RuntimeError("The filament presets could not be updated: " + state["error"])
+    names = snap["names"] | {PROFILE_PREFIX + n for n in state["names"].values()}
+    plan, missing = slot_plan(printer_trays(snap["host"]), snap["slots"], names)
+    done, failed = 0, []
+    for slot, name in plan:
+        try:
+            orca.host.preset.filament.begin_update(slot, name).commit()
+            done += 1
+        except Exception as exc:
+            log.warning("Could not load %s into slot %d: %s", name, slot, exc)
+            failed.append(slot)
+    text = f"Loaded {done} filament slot(s) from the printer."
+    if missing:
+        text += " No Spoolman filament matched slot(s) " + ", ".join(map(str, missing)) + "."
+    if failed:
+        text += " Could not change slot(s) " + ", ".join(map(str, failed)) + "."
+    return text
+
+
+SNAPSHOT_EVENTS = ("PresetSelected", "PresetSaved", "ProjectOpened", "NewProject")
+
+
 class SpoolerLoadFilaments(orca.script.ScriptPluginCapabilityBase):
     """Plugins > Run: put the filament each printer slot holds into the plate's filament slots."""
 
     def get_name(self):
         return f"{PLUGIN_NAME}: Load Printer Filaments"
 
+    def on_lifecycle_event(self, event, ctx):
+        # Preset and project events arrive on the UI thread, where the presets may be read;
+        # execute() runs on a worker thread, so it uses this snapshot.
+        try:
+            if any(event == getattr(orca.LifecycleEvent, name, None) for name in SNAPSHOT_EVENTS):
+                profile_snapshot()
+        except Exception:
+            log.exception("Snapshot on %s failed", event)
+
     def execute(self):
         try:
-            bundle = orca.host.preset_bundle()
-            base = moon_base(bundle.full_config_value("print_host"))
-            slots = len(bundle.current_filament_preset_names())
-            names = set(bundle.filaments.preset_names())
-            if not base:
-                raise RuntimeError("The selected printer preset has no host address.")
-            plan, missing = slot_plan(printer_trays(base), slots, names)
-            for slot, name in plan:
-                tx = orca.host.preset.filament.begin_update(slot, name)
-                try:
-                    tx.commit()
-                except Exception:
-                    log.info("Nothing to commit for slot %d", slot)
-            text = f"Loaded {len(plan)} filament slot(s) from the printer."
-            if missing:
-                text += " No Spoolman filament matched slot(s) " + ", ".join(map(str, missing)) + "."
+            text = load_printer_filaments(dict(_ui_snap))
             log.info(text)
             return orca.ExecutionResult.success(text)
         except Exception as exc:

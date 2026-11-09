@@ -111,6 +111,68 @@ class SingleTest(unittest.TestCase):
         self.assertEqual(doc["print"]["vt_tray"], {"id": "254"})
 
 
+class ProbeTest(unittest.TestCase):
+    def test_is_moonraker(self):
+        original = sp._moon_get
+        try:
+            sp._moon_get = lambda base, path: {"klippy_state": "ready"}
+            self.assertTrue(sp.is_moonraker("http://x"))
+            sp._moon_get = lambda base, path: {"name": "PrusaLink"}
+            self.assertFalse(sp.is_moonraker("http://x"))
+
+            def missing(base, path):
+                raise sp.urllib.error.HTTPError(base + path, 404, "Not Found", {}, None)
+
+            sp._moon_get = missing
+            self.assertFalse(sp.is_moonraker("http://x"))
+        finally:
+            sp._moon_get = original
+
+    def test_not_moonraker_printers_are_hidden(self):
+        sp._auto_printers[:] = [{"id": "auto-a", "name": "A", "units": [], "ip": "http://a",
+                                 "serial": "", "kind": "moonraker", "auto": True}]
+        sp._live["links"]["auto-a"] = "none"
+        try:
+            self.assertEqual(sp.printer_state()["printers"], [])
+        finally:
+            sp._live["links"].pop("auto-a")
+            sp._auto_printers.clear()
+
+
+class LoadTest(unittest.TestCase):
+    def test_load_selects_profiles(self):
+        calls = []
+
+        class Tx:
+            def __init__(self, slot, name):
+                calls.append((slot, name))
+
+            def commit(self):
+                if calls[-1][0] == 2:
+                    raise ValueError("bad")
+
+        orca.host.preset.filament = types.SimpleNamespace(begin_update=Tx)
+        originals = (sp.get_spools, sp.profile_sync, sp.moon_poll)
+        sp.get_spools = lambda url: {"ok": True, "spools": SPOOLS}
+        sp.profile_sync = lambda spools, snap: {"error": "", "names": {10: "SUNLU PETG Black", 11: "SUNLU PLA Red"}}
+        sp.moon_poll = lambda base: sp.moon_report(U1_STATUS, None, SPOOLS)
+        sp._profiles["names"] = {10: "SUNLU PETG Black", 11: "SUNLU PLA Red"}
+        try:
+            text = sp.load_printer_filaments({"host": "http://u1", "slots": 4, "names": set()})
+        finally:
+            sp.get_spools, sp.profile_sync, sp.moon_poll = originals
+        self.assertEqual(calls, [(1, "_local/spooler/SUNLU PETG Black"), (2, "_local/spooler/SUNLU PLA Red")])
+        self.assertIn("Loaded 1 filament", text)
+        self.assertIn("slot(s) 4.", text)
+        self.assertIn("Could not change slot(s) 2", text)
+
+    def test_needs_snapshot_and_host(self):
+        with self.assertRaises(RuntimeError):
+            sp.load_printer_filaments({})
+        with self.assertRaises(RuntimeError):
+            sp.load_printer_filaments({"host": "", "slots": 1, "names": set()})
+
+
 class PlanTest(unittest.TestCase):
     def test_plan(self):
         trays = [{"profile": "_local/spooler/A", "tray_type": "PLA"},

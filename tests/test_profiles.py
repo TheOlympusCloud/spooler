@@ -45,6 +45,11 @@ class NameTest(unittest.TestCase):
     def test_keeps_name_that_has_both(self):
         self.assertEqual(sp.profile_name(filament(1, "SUNLU PLA+ Red", "PLA+")), "SUNLU PLA+ Red")
 
+    def test_control_characters_and_reserved_names(self):
+        self.assertEqual(sp._safe_name("a\x00b\nc"), "a b c")
+        self.assertEqual(sp._safe_name("CON"), "_CON")
+        self.assertEqual(sp._safe_name("nul.txt"), "_nul.txt")
+
     def test_strips_path_characters(self):
         self.assertEqual(sp.profile_name(filament(1, "Red/Blue: dual", "PLA")), "SUNLU PLA Red Blue dual")
 
@@ -133,8 +138,46 @@ class SyncTest(unittest.TestCase):
         finally:
             orca.host.preset.bundles.reload_local = original
         self.assertIn("invalid preset", state["error"])
+        # Refused presets wait before being offered again, instead of every refresh.
         sp.profile_sync(spools, snap)
+        self.assertEqual(orca.reloads, [])
+        sp._profiles["failed"] = (sp._profiles["failed"][0], -sp.PROFILE_RETRY)
+        state = sp.profile_sync(spools, snap)
         self.assertEqual(orca.reloads, ["spooler"])
+        self.assertEqual(state["error"], "")
+
+    def test_finds_account_folder_without_user_presets(self):
+        (self.root / "user" / "default").mkdir(parents=True)
+        (self.root / "user" / "4242").mkdir(parents=True)
+        original = orca.host.preset.bundles.reload_local
+
+        def only_account(bundle_id):
+            if not (self.root / "user" / "4242" / "_local" / bundle_id).exists():
+                raise RuntimeError("Local bundle directory does not exist")
+            orca.reloads.append(bundle_id)
+
+        orca.host.preset.bundles.reload_local = only_account
+        try:
+            state = sp.profile_sync([spool(1, filament(1, "Black", "PETG"))], {"names": NAMES, "folder": ""})
+        finally:
+            orca.host.preset.bundles.reload_local = original
+        self.assertEqual(state["error"], "")
+        self.assertTrue((self.root / "user" / "4242" / "_local" / "spooler" / "filament").is_dir())
+        self.assertFalse((self.root / "user" / "default" / "_local" / "spooler").exists())
+
+    def test_filament_without_parent_is_left_out(self):
+        files, by_id = sp.profile_files([spool(1, filament(1, "Black", "PETG"))], set())
+        self.assertEqual((files, by_id), ({}, {}))
+
+    def test_case_only_names_do_not_collide(self):
+        spools = [spool(1, filament(1, "black", "PETG")), spool(2, filament(2, "Black", "PETG"))]
+        self.assertEqual(sorted(sp.profile_names(spools).values()), ["SUNLU PETG Black #2", "SUNLU PETG black"])
+
+    def test_case_only_rename_keeps_new_file(self):
+        target = self.root / "bundle"
+        sp.write_profiles(target, {"a.json": {}})
+        sp.write_profiles(target, {"A.json": {}})
+        self.assertEqual(len(list((target / "filament").glob("*.json"))), 1)
 
 
 if __name__ == "__main__":
