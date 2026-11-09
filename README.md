@@ -68,7 +68,11 @@ Chrome or Chromium).
 
 ## Install
 
-Download the file for your system from the [latest release](../../releases/latest):
+**From Orca Cloud:** open the [Plugin Hub](https://cloud.orcaslicer.com/app/plugins/plugin-hub), find
+**Spooler** and subscribe, then in OrcaSlicer open ***File > Plugins***, click ***Refresh*** and tick
+***Activate***. Updates arrive the same way.
+
+**Manually:** download the file for your system from the [latest release](../../releases/latest):
 
 | System | File |
 |---|---|
