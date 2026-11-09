@@ -1,5 +1,25 @@
 # Changelog
 
+Spooler is a fork of [Spoolio](https://github.com/danm1989/spoolio-orcaslicer); entries before
+0.9.0 are Spoolio's.
+
+## [0.9.0] - 2026-11-09
+
+First Spooler release: set your Spoolman address once and the rest is automatic.
+
+### Added
+- Spoolman filaments become OrcaSlicer filament presets, one per printer, hot-reloaded as a local
+  preset bundle. Pick one for a slot in the sidebar and the slot takes the filament's colour.
+  Each preset inherits the closest preset OrcaSlicer has for that printer (vendor line, then the
+  printer's tuned generic, then the filament library) and carries Spoolman's colour, vendor,
+  temperatures, density, diameter and cost.
+- Klipper/Moonraker printers are found from the host address on your OrcaSlicer printer presets and
+  shown in the Printer tab: Snapmaker U1 toolheads (matched by the spool id the printer reports,
+  RFID tag, or colour) and single-extruder printers through Moonraker's Spoolman integration.
+- Plugins > Run > "Spooler: Load Printer Filaments" assigns the matching presets to the plate's
+  filament slots.
+- Unit tests, run in CI on Windows, macOS and Linux.
+
 ## [0.8.4] - 2026-11-05
 
 ### Fixed

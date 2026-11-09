@@ -86,6 +86,20 @@ class NameTest(unittest.TestCase):
         self.assertEqual(sp._safe_name("CON"), "_CON")
         self.assertEqual(sp._safe_name("nul.txt"), "_nul.txt")
 
+    def test_words_orca_blocks_in_paths_are_split(self):
+        # OrcaSlicer denies plugin writes to any path containing secret, cert or conf.
+        for text in ("Silk Confetti PLA", "Certified PETG", "SECRET blend", "Concert"):
+            name = sp._safe_name(text)
+            self.assertNotRegex(name, r"(?i)secret|cert|conf")
+            self.assertEqual(name.replace("\u200b", ""), text)
+
+    def test_long_names_fit_windows_paths(self):
+        f = filament(1, "x" * 200, "PLA", vendor="v" * 200)
+        names = sp.profile_names([spool(1, f)], [{"target": U1, "label": "y" * 200}])
+        name = names[(1, U1)]
+        root = "C:\\Users\\someone.long\\AppData\\Roaming\\OrcaSlicer\\user\\" + "a" * 36
+        self.assertLess(len(root + "\\_local\\spooler\\filament\\" + name + ".json"), 260)
+
     def test_unicode_is_kept(self):
         self.assertEqual(sp._safe_name("Pérola"), "Pérola")
 

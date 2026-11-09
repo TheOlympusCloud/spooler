@@ -84,7 +84,7 @@ The Spooler tab opens on its Settings page on first run. Enter your Spoolman ser
 
 Prefer Bambu Cloud? Choose ***Bambu Cloud*** under ***Choose Your Source***, enter your Bambu email and password, pick Global or China, and enter the verification code if Bambu asks for one. Spooler never stores your password, only the sign-in token Bambu returns, and ***Sign Out*** removes it.
 
-OrcaSlicer asks before a plugin does anything sensitive. Expect a prompt the first time the plugin connects to Spoolman, Bambu Cloud or a printer, the first time it writes the filament presets into OrcaSlicer's user folder, and the first time you click a reorder cart to open your browser.
+OrcaSlicer asks before a plugin does anything sensitive. Granting Spooler full access in the permission dialog avoids repeated prompts; otherwise each new address it reads (Spoolman and each printer) is approved once and remembered. Expect a prompt the first time the plugin connects to Spoolman, Bambu Cloud or a printer, the first time it writes the filament presets into OrcaSlicer's user folder, and the first time you click a reorder cart to open your browser.
 
 > [!TIP]
 > ### Printer Tab

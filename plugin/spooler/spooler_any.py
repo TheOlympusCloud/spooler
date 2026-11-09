@@ -724,13 +724,19 @@ def best_parent(filament: dict, target: str, parents: list[dict]) -> str:
     return best[1] if best else ""
 
 
-def _safe_name(text: str) -> str:
-    name = re.sub(r'[\x00-\x1f\\/:*?"<>|;@]', " ", unicodedata.normalize("NFC", text))
-    name = re.sub(r"\s+", " ", name).strip(" .")[:80]
-    return f"_{name}" if WINDOWS_RESERVED.fullmatch(name) else name
-
-
 WINDOWS_RESERVED = re.compile(r"(CON|PRN|AUX|NUL|COM\d|LPT\d)(\..*)?", re.I)
+# OrcaSlicer blocks any plugin write to a path containing these words, and a preset's name is its
+# file name, so they are split with an invisible zero-width space ("Con\u200bfetti").
+DENIED_WORDS = re.compile(r"(?i)secret|cert|conf")
+NAME_MAX = 60  # with " #id @printer" (LABEL_MAX) it stays under Windows' 260-character path limit
+LABEL_MAX = 30
+
+
+def _safe_name(text: str) -> str:
+    name = re.sub(r'[\x00-\x1f\u200b\\/:*?"<>|;@]', " ", unicodedata.normalize("NFC", text))
+    name = re.sub(r"\s+", " ", name).strip(" .")[:NAME_MAX].strip(" .")
+    name = f"_{name}" if WINDOWS_RESERVED.fullmatch(name) else name
+    return DENIED_WORDS.sub(lambda m: m.group(0)[0] + "\u200b" + m.group(0)[1:], name)
 
 
 def profile_name(filament: dict) -> str:
@@ -806,10 +812,11 @@ def profile_names(spools: list[dict], printers: list[dict]) -> dict:
     by_key: dict = {}
     taken: set[str] = set()
     for printer in printers:
+        label = _safe_name(printer["label"])[:LABEL_MAX].strip()
         for filament in stocked_filaments(spools):
-            name = f"{profile_name(filament)} @{printer['label']}"
+            name = f"{profile_name(filament)} @{label}"
             if name.casefold() in taken:
-                name = f"{profile_name(filament)} #{filament['id']} @{printer['label']}"
+                name = f"{profile_name(filament)} #{filament['id']} @{label}"
             taken.add(name.casefold())
             by_key[(filament["id"], printer["target"])] = name
     return by_key
@@ -1664,7 +1671,9 @@ def _moon_run(pid: str, link: dict, stop: threading.Event) -> None:
         except Exception as exc:
             fails += 1
             _live["links"][pid] = "unreachable"
-            _report(f"Printer {link['name']}", str(exc))
+            # One message per kind of failure, so an offline printer logs once, not every retry.
+            reason = "not reachable" if isinstance(exc, (urllib.error.URLError, OSError)) else str(exc)
+            _report(f"Printer {link['name']}", reason)
         stop.wait(MOON_POLL if not fails else LIVE_RETRY[min(fails - 1, len(LIVE_RETRY) - 1)])
     _live["links"].pop(pid, None)
 
