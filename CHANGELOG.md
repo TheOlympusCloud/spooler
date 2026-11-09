@@ -3,12 +3,17 @@
 Spooler is a fork of [Spoolio](https://github.com/danm1989/spoolio-orcaslicer); entries before
 0.9.0 are Spoolio's.
 
-## [0.9.1] - 2026-11-09
+## [0.9.2] - Unreleased
 
 ### Added
 - Anycubic Kobra X (and other Anycubic printers in LAN mode): the multi-colour box slots and the
   external spool show in the Printer tab, matched to Spoolman spools by material and colour. The
   printer is found from its preset's host address, like Moonraker printers.
+
+### Changed
+- Publishing a GitHub release publishes it to Orca Cloud.
+
+## [0.9.1] - 2026-11-09
 
 ### Changed
 - New Spooler brand: logo in the tab header, tab icon, banner and store images.
