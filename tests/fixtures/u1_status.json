@@ -1,0 +1,401 @@
+{
+"print_task_config": {
+"filament_vendor": [
+"Snapmaker",
+"Snapmaker",
+"Snapmaker",
+"Snapmaker"
+],
+"filament_type": [
+"PLA",
+"PLA",
+"PLA",
+"PLA"
+],
+"filament_sub_type": [
+"SnapSpeed",
+"SnapSpeed",
+"SnapSpeed",
+"SnapSpeed"
+],
+"filament_color": [
+4294230066,
+4293340957,
+4293058267,
+4278716941
+],
+"filament_color_rgba": [
+"F4C032FF",
+"E72F1DFF",
+"E2DEDBFF",
+"080A0DFF"
+],
+"filament_color_multi": [
+{
+"nums": 1,
+"alpha": 255,
+"mode": 0,
+"colors": [
+"F4C032"
+]
+},
+{
+"nums": 1,
+"alpha": 255,
+"mode": 0,
+"colors": [
+"E72F1D"
+]
+},
+{
+"nums": 1,
+"alpha": 255,
+"mode": 0,
+"colors": [
+"E2DEDB"
+]
+},
+{
+"nums": 1,
+"alpha": 255,
+"mode": 0,
+"colors": [
+"080A0D"
+]
+}
+],
+"filament_official": [
+true,
+true,
+true,
+true
+],
+"filament_sku": [
+0,
+0,
+0,
+0
+],
+"filament_edit": [
+false,
+false,
+false,
+false
+],
+"filament_exist": [
+true,
+true,
+true,
+true
+],
+"filament_soft": [
+false,
+false,
+false,
+false
+],
+"extruder_map_table": [
+0,
+1,
+2,
+3,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"extruders_used": [
+false,
+false,
+true,
+false
+],
+"extruders_replenished": [
+0,
+1,
+2,
+3
+],
+"time_lapse_camera": true,
+"auto_bed_leveling": true,
+"flow_calibrate": false,
+"flow_calib_extruders": [
+false,
+false,
+false,
+false
+],
+"shaper_calibrate": false,
+"auto_replenish_filament": true,
+"replenish_ignore_color": false,
+"filament_entangle_detect": true,
+"filament_entangle_sen": "medium",
+"end_led_turn_off": true,
+"end_unload_filament": [
+false,
+false,
+false,
+false
+],
+"reprint_info": {
+"auto_bed_leveling": true,
+"flow_calibrate": false,
+"flow_calib_extruders": [
+false,
+false,
+false,
+false
+],
+"time_lapse_camera": true,
+"extruder_map_table": [
+0,
+1,
+2,
+3,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"extruders_used": [
+false,
+false,
+true,
+false
+],
+"end_unload_filament": [
+false,
+false,
+false,
+false
+]
+},
+"filament_spool_id": [
+3,
+4,
+6,
+5
+]
+},
+"filament_detect": {
+"info": [
+{
+"VERSION": 1,
+"VENDOR": "Snapmaker",
+"MANUFACTURER": "Polymaker",
+"MAIN_TYPE": "PLA",
+"SUB_TYPE": "SnapSpeed",
+"TRAY": 0,
+"ALPHA": 255,
+"MULTI_MODE": 0,
+"COLOR_NUMS": 1,
+"ARGB_COLOR": 4294230066,
+"RGB_1": 16039986,
+"RGB_2": 0,
+"RGB_3": 0,
+"RGB_4": 0,
+"RGB_5": 0,
+"DIAMETER": 175,
+"WEIGHT": 500,
+"LENGTH": 150,
+"DRYING_TEMP": 55,
+"DRYING_TIME": 6,
+"HOTEND_MAX_TEMP": 230,
+"HOTEND_MIN_TEMP": 190,
+"BED_TYPE": 1,
+"BED_TEMP": 60,
+"FIRST_LAYER_TEMP": 230,
+"OTHER_LAYER_TEMP": 220,
+"SKU": 900003,
+"MF_DATE": "19700101",
+"RSA_KEY_VERSION": 0,
+"OFFICIAL": true,
+"CARD_UID": [
+96,
+130,
+122,
+106
+],
+"CARD_TYPE": "M1",
+"CARD_EVENT_TIME": 26.714843054
+},
+{
+"VERSION": 1,
+"VENDOR": "Snapmaker",
+"MANUFACTURER": "Polymaker",
+"MAIN_TYPE": "PLA",
+"SUB_TYPE": "SnapSpeed",
+"TRAY": 0,
+"ALPHA": 255,
+"MULTI_MODE": 0,
+"COLOR_NUMS": 1,
+"ARGB_COLOR": 4293340957,
+"RGB_1": 15150877,
+"RGB_2": 0,
+"RGB_3": 0,
+"RGB_4": 0,
+"RGB_5": 0,
+"DIAMETER": 175,
+"WEIGHT": 500,
+"LENGTH": 150,
+"DRYING_TEMP": 55,
+"DRYING_TIME": 6,
+"HOTEND_MAX_TEMP": 230,
+"HOTEND_MIN_TEMP": 190,
+"BED_TYPE": 1,
+"BED_TEMP": 60,
+"FIRST_LAYER_TEMP": 230,
+"OTHER_LAYER_TEMP": 220,
+"SKU": 900002,
+"MF_DATE": "19700101",
+"RSA_KEY_VERSION": 0,
+"OFFICIAL": true,
+"CARD_UID": [
+0,
+83,
+143,
+106
+],
+"CARD_TYPE": "M1",
+"CARD_EVENT_TIME": 27.341569679
+},
+{
+"VERSION": 1,
+"VENDOR": "Snapmaker",
+"MANUFACTURER": "Polymaker",
+"MAIN_TYPE": "PLA",
+"SUB_TYPE": "SnapSpeed",
+"TRAY": 0,
+"ALPHA": 255,
+"MULTI_MODE": 0,
+"COLOR_NUMS": 1,
+"ARGB_COLOR": 4293058267,
+"RGB_1": 14868187,
+"RGB_2": 0,
+"RGB_3": 0,
+"RGB_4": 0,
+"RGB_5": 0,
+"DIAMETER": 175,
+"WEIGHT": 500,
+"LENGTH": 150,
+"DRYING_TEMP": 55,
+"DRYING_TIME": 6,
+"HOTEND_MAX_TEMP": 230,
+"HOTEND_MIN_TEMP": 190,
+"BED_TYPE": 1,
+"BED_TEMP": 60,
+"FIRST_LAYER_TEMP": 230,
+"OTHER_LAYER_TEMP": 220,
+"SKU": 900000,
+"MF_DATE": "19700101",
+"RSA_KEY_VERSION": 0,
+"OFFICIAL": true,
+"CARD_UID": [
+64,
+59,
+105,
+106
+],
+"CARD_TYPE": "M1",
+"CARD_EVENT_TIME": 27.963812804
+},
+{
+"VERSION": 1,
+"VENDOR": "Snapmaker",
+"MANUFACTURER": "Polymaker",
+"MAIN_TYPE": "PLA",
+"SUB_TYPE": "SnapSpeed",
+"TRAY": 0,
+"ALPHA": 255,
+"MULTI_MODE": 0,
+"COLOR_NUMS": 1,
+"ARGB_COLOR": 4278716941,
+"RGB_1": 526861,
+"RGB_2": 0,
+"RGB_3": 0,
+"RGB_4": 0,
+"RGB_5": 0,
+"DIAMETER": 175,
+"WEIGHT": 500,
+"LENGTH": 150,
+"DRYING_TEMP": 55,
+"DRYING_TIME": 6,
+"HOTEND_MAX_TEMP": 230,
+"HOTEND_MIN_TEMP": 190,
+"BED_TYPE": 1,
+"BED_TEMP": 60,
+"FIRST_LAYER_TEMP": 230,
+"OTHER_LAYER_TEMP": 220,
+"SKU": 900001,
+"MF_DATE": "19700101",
+"RSA_KEY_VERSION": 0,
+"OFFICIAL": true,
+"CARD_UID": [
+48,
+17,
+130,
+106
+],
+"CARD_TYPE": "M1",
+"CARD_EVENT_TIME": 28.575395805
+}
+],
+"state": [
+0,
+0,
+0,
+0
+],
+"config": {
+"startup_stay": false
+}
+}
+}

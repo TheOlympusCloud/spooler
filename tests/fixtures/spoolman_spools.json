@@ -1,0 +1,1140 @@
+[
+{
+"id": 18,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 13,
+"name": "Pérola",
+"material": "PLA",
+"color_hex": "EAE0C8",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 19,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 14,
+"name": "Preto matte",
+"material": "PLA",
+"color_hex": "1C1C1C",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 20,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 14,
+"name": "Preto matte",
+"material": "PLA",
+"color_hex": "1C1C1C",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 3,
+"archived": false,
+"remaining_weight": 374.2538555552594,
+"initial_weight": 500.0,
+"extra": {
+"card_uids": "\"60827A6A\""
+},
+"filament": {
+"id": 3,
+"name": "PLA SnapSpeed Yellow",
+"material": "PLA",
+"color_hex": "F4C032",
+"settings_extruder_temp": 230,
+"settings_bed_temp": 60,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 500.0,
+"vendor": {
+"name": "Snapmaker"
+}
+}
+},
+{
+"id": 5,
+"archived": false,
+"remaining_weight": 355.50854398118736,
+"initial_weight": 500.0,
+"extra": {
+"card_uids": "\"3011826A\""
+},
+"filament": {
+"id": 5,
+"name": "PLA SnapSpeed Black",
+"material": "PLA",
+"color_hex": "080A0D",
+"settings_extruder_temp": 230,
+"settings_bed_temp": 60,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 500.0,
+"vendor": {
+"name": "Snapmaker"
+}
+}
+},
+{
+"id": 21,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 14,
+"name": "Preto matte",
+"material": "PLA",
+"color_hex": "1C1C1C",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 22,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 15,
+"name": "Marrom escuro",
+"material": "PLA",
+"color_hex": "4B2E1E",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 23,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 15,
+"name": "Marrom escuro",
+"material": "PLA",
+"color_hex": "4B2E1E",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 24,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 16,
+"name": "Bege escuro",
+"material": "PLA",
+"color_hex": "C8AD7F",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 25,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 16,
+"name": "Bege escuro",
+"material": "PLA",
+"color_hex": "C8AD7F",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 26,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 17,
+"name": "Caucasiano",
+"material": "PLA",
+"color_hex": "E8BE9A",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 27,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 17,
+"name": "Caucasiano",
+"material": "PLA",
+"color_hex": "E8BE9A",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 28,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 18,
+"name": "Ouro",
+"material": "PLA",
+"color_hex": "D4AF37",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 29,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 19,
+"name": "Preto perolado metalizado",
+"material": "PLA",
+"color_hex": "2B2B30",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 30,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 20,
+"name": "Marrom terra",
+"material": "PLA",
+"color_hex": "8B5A2B",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 31,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 20,
+"name": "Marrom terra",
+"material": "PLA",
+"color_hex": "8B5A2B",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 32,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 21,
+"name": "Marrom claro",
+"material": "PLA",
+"color_hex": "A0785A",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 33,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 21,
+"name": "Marrom claro",
+"material": "PLA",
+"color_hex": "A0785A",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 34,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 22,
+"name": "Amarelo",
+"material": "PLA",
+"color_hex": "FFFF00",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 35,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 23,
+"name": "Bronze",
+"material": "PLA",
+"color_hex": "CD7F32",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 36,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 24,
+"name": "Bege areia",
+"material": "PLA",
+"color_hex": "D8C3A0",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 37,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 24,
+"name": "Bege areia",
+"material": "PLA",
+"color_hex": "D8C3A0",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 38,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 25,
+"name": "Cinza",
+"material": "PLA",
+"color_hex": "808080",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 39,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 26,
+"name": "Azul",
+"material": "PLA",
+"color_hex": "0000FF",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 40,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 27,
+"name": "Verde",
+"material": "PLA",
+"color_hex": "008000",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 41,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 28,
+"name": "Azul claro metalizado",
+"material": "PLA",
+"color_hex": "7FB3E6",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 42,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 29,
+"name": "Verde natal silk",
+"material": "PLA",
+"color_hex": "0B6623",
+"settings_extruder_temp": 230,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 43,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 30,
+"name": "Ouro silk",
+"material": "PLA",
+"color_hex": "E6BE48",
+"settings_extruder_temp": 230,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 44,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 31,
+"name": "Cobre",
+"material": "PLA",
+"color_hex": "B87333",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 45,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 32,
+"name": "Vermelho",
+"material": "PLA",
+"color_hex": "FF0000",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 4,
+"archived": false,
+"remaining_weight": 382.91802228155046,
+"initial_weight": 500.0,
+"extra": {
+"card_uids": "\"00538F6A\""
+},
+"filament": {
+"id": 4,
+"name": "PLA SnapSpeed Red",
+"material": "PLA",
+"color_hex": "E72F1D",
+"settings_extruder_temp": 230,
+"settings_bed_temp": 60,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 500.0,
+"vendor": {
+"name": "Snapmaker"
+}
+}
+},
+{
+"id": 2,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 2,
+"name": "PETG Preto",
+"material": "PETG",
+"color_hex": "000000",
+"density": 1.27,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "MasterPrint"
+}
+}
+},
+{
+"id": 7,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 7,
+"name": "Bege claro",
+"material": "PLA",
+"color_hex": "F5E6CC",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 8,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 7,
+"name": "Bege claro",
+"material": "PLA",
+"color_hex": "F5E6CC",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 9,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 8,
+"name": "Cinza grafite",
+"material": "PLA",
+"color_hex": "41424C",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 10,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 9,
+"name": "Branco",
+"material": "PLA",
+"color_hex": "FFFFFF",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 11,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 9,
+"name": "Branco",
+"material": "PLA",
+"color_hex": "FFFFFF",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 12,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 10,
+"name": "Preto",
+"material": "PLA",
+"color_hex": "000000",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 13,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 10,
+"name": "Preto",
+"material": "PLA",
+"color_hex": "000000",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 14,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 10,
+"name": "Preto",
+"material": "PLA",
+"color_hex": "000000",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 15,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 11,
+"name": "Cinza grafite perolado",
+"material": "PLA",
+"color_hex": "4A4D55",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 16,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 12,
+"name": "Branco marmorizado",
+"material": "PLA",
+"color_hex": "F2F2EE",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 17,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 12,
+"name": "Branco marmorizado",
+"material": "PLA",
+"color_hex": "F2F2EE",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 46,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 32,
+"name": "Vermelho",
+"material": "PLA",
+"color_hex": "FF0000",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 51,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 35,
+"name": "Laranja",
+"material": "PLA",
+"color_hex": "FFA500",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 47,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 32,
+"name": "Vermelho",
+"material": "PLA",
+"color_hex": "FF0000",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 52,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 36,
+"name": "Roxo",
+"material": "PLA",
+"color_hex": "800080",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 48,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 33,
+"name": "Verde militar escuro",
+"material": "PLA",
+"color_hex": "3B4A2A",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 53,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 37,
+"name": "Vermelho metalizado",
+"material": "PLA",
+"color_hex": "C41E3A",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 49,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 33,
+"name": "Verde militar escuro",
+"material": "PLA",
+"color_hex": "3B4A2A",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 54,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 38,
+"name": "Vermelho silk",
+"material": "PLA",
+"color_hex": "D1001F",
+"settings_extruder_temp": 230,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 50,
+"archived": false,
+"remaining_weight": 1000.0,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 34,
+"name": "Verde escuro",
+"material": "PLA",
+"color_hex": "006400",
+"settings_extruder_temp": 205,
+"settings_bed_temp": 65,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "3D Procer"
+}
+}
+},
+{
+"id": 1,
+"archived": false,
+"remaining_weight": 376.2340104730814,
+"initial_weight": 1000.0,
+"extra": {},
+"filament": {
+"id": 2,
+"name": "PETG Preto",
+"material": "PETG",
+"color_hex": "000000",
+"density": 1.27,
+"diameter": 1.75,
+"weight": 1000.0,
+"vendor": {
+"name": "MasterPrint"
+}
+}
+},
+{
+"id": 6,
+"archived": false,
+"remaining_weight": 84.15538688170699,
+"initial_weight": 500.0,
+"extra": {
+"card_uids": "\"403B696A\""
+},
+"filament": {
+"id": 6,
+"name": "PLA SnapSpeed White",
+"material": "PLA",
+"color_hex": "E2DEDB",
+"settings_extruder_temp": 230,
+"settings_bed_temp": 60,
+"density": 1.24,
+"diameter": 1.75,
+"weight": 500.0,
+"vendor": {
+"name": "Snapmaker"
+}
+}
+}
+]

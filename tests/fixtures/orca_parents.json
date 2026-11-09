@@ -1,0 +1,3252 @@
+[
+{
+"name": "3D-Fuel PET CF @System",
+"vendor": "3D-Fuel",
+"type": "PET-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Pro PCTG @System",
+"vendor": "3D-Fuel",
+"type": "PCTG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Pro PCTG ESD @System",
+"vendor": "3D-Fuel",
+"type": "PCTG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Pro PCTG Matte @System",
+"vendor": "3D-Fuel",
+"type": "PCTG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Pro PCTG Refuel @System",
+"vendor": "3D-Fuel",
+"type": "PCTG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Pro PCTG-CF @System",
+"vendor": "3D-Fuel",
+"type": "PCTG-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Pro PCTG-GF @System",
+"vendor": "3D-Fuel",
+"type": "PCTG-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Pro PETG @System",
+"vendor": "3D-Fuel",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Pro PETG Refuel @System",
+"vendor": "3D-Fuel",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Standard PLA @System",
+"vendor": "3D-Fuel",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Standard PLA Refuel @System",
+"vendor": "3D-Fuel",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Tough Pro PLA @System",
+"vendor": "3D-Fuel",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "3D-Fuel Tough Pro Refuel @System",
+"vendor": "3D-Fuel",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "AliZ PA-CF @System",
+"vendor": "Aliz",
+"type": "PA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "AliZ PETG @System",
+"vendor": "Aliz",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "AliZ PETG-CF @System",
+"vendor": "Aliz",
+"type": "PETG-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "AliZ PETG-Metal @System",
+"vendor": "Aliz",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "AliZ PLA @System",
+"vendor": "Aliz",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu ABS @System",
+"vendor": "Bambu Lab",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu ABS-GF @System",
+"vendor": "Bambu Lab",
+"type": "ABS-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu ASA @System",
+"vendor": "Bambu Lab",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu ASA-Aero @System",
+"vendor": "Bambu Lab",
+"type": "ASA-AERO",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu ASA-CF @System",
+"vendor": "Bambu Lab",
+"type": "ASA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PA-CF @System",
+"vendor": "Bambu Lab",
+"type": "PA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PA6-CF @System",
+"vendor": "Bambu Lab",
+"type": "PA6-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PA6-GF @System",
+"vendor": "Bambu Lab",
+"type": "PA-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PAHT-CF @System",
+"vendor": "Bambu Lab",
+"type": "PA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PC @System",
+"vendor": "Bambu Lab",
+"type": "PC",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PC FR @System",
+"vendor": "Bambu Lab",
+"type": "PC",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PET-CF @System",
+"vendor": "Bambu Lab",
+"type": "PET-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PETG Basic @System",
+"vendor": "Bambu Lab",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PETG HF @System",
+"vendor": "Bambu Lab",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PETG Matte @System",
+"vendor": "Bambu Lab",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PETG Translucent @System",
+"vendor": "Bambu Lab",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PETG-CF @System",
+"vendor": "Bambu Lab",
+"type": "PETG-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Aero @System",
+"vendor": "Bambu Lab",
+"type": "PLA-AERO",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Basic @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Dynamic @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Galaxy @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Glow @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Impact @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Lite @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Marble @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Matte @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Metal @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Pure @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Silk @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Silk+ @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Sparkle @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Tough @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Tough+ @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Translucent @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA Wood @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PLA-CF @System",
+"vendor": "Bambu Lab",
+"type": "PLA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PPA-CF @System",
+"vendor": "Bambu Lab",
+"type": "PPA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu PVA @System",
+"vendor": "Bambu Lab",
+"type": "PVA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu Support For PA/PET @System",
+"vendor": "Bambu Lab",
+"type": "PA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu Support For PLA @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu Support For PLA/PETG @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu Support G @System",
+"vendor": "Bambu Lab",
+"type": "PA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu Support W @System",
+"vendor": "Bambu Lab",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu Support for ABS @System",
+"vendor": "Bambu Lab",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu TPU 85A @System",
+"vendor": "Bambu Lab",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu TPU 90A @System",
+"vendor": "Bambu Lab",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu TPU 95A @System",
+"vendor": "Bambu Lab",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu TPU 95A HF @System",
+"vendor": "Bambu Lab",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Bambu TPU for AMS @System",
+"vendor": "Bambu Lab",
+"type": "TPU-AMS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX ABS @System",
+"vendor": "COEX 3D",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX ABS PRIME @System",
+"vendor": "COEX 3D",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX ASA PRIME @System",
+"vendor": "COEX 3D",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX NYLEX PA6-CF @System",
+"vendor": "COEX 3D",
+"type": "PA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX PCTG PRIME @System",
+"vendor": "COEX 3D",
+"type": "PCTG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX PETG @System",
+"vendor": "COEX 3D",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX PLA @System",
+"vendor": "COEX 3D",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX PLA PRIME @System",
+"vendor": "COEX 3D",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX PLA+Silk @System",
+"vendor": "COEX 3D",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX TPE 30D @System",
+"vendor": "COEX 3D",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX TPE 40D @System",
+"vendor": "COEX 3D",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX TPE 60D @System",
+"vendor": "COEX 3D",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "COEX TPU 60A @System",
+"vendor": "COEX 3D",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC ABS @System",
+"vendor": "DREMC",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC ABS+ @System",
+"vendor": "DREMC",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC ABS-GF @System",
+"vendor": "DREMC",
+"type": "ABS-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC ASA @System",
+"vendor": "DREMC",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC ASA CF @System",
+"vendor": "DREMC",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC ASA GF @System",
+"vendor": "DREMC",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC PA12-CF @System",
+"vendor": "DREMC",
+"type": "PA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC PA6-CF @System",
+"vendor": "DREMC",
+"type": "PA6-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC PET-CF @System",
+"vendor": "DREMC",
+"type": "PET-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC PETG @System",
+"vendor": "DREMC",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC PLA+ @System",
+"vendor": "DREMC",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC PLA+ HS @System",
+"vendor": "DREMC",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC PPA-CF @System",
+"vendor": "DREMC",
+"type": "PPA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "DREMC TPU 95A @System",
+"vendor": "DREMC",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elas ASA @System",
+"vendor": "Elas",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elas PETG Basic @System",
+"vendor": "Elas",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elas PLA Basic @System",
+"vendor": "Elas",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elas PLA Pro @System",
+"vendor": "Elas",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo ABS @System",
+"vendor": "Elegoo",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo ASA @System",
+"vendor": "Elegoo",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo ASA-CF @System",
+"vendor": "Elegoo",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PAHT-CF @System",
+"vendor": "Elegoo",
+"type": "PA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PC @System",
+"vendor": "Elegoo",
+"type": "PC",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PC-FR @System",
+"vendor": "Elegoo",
+"type": "PC",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PET-CF @System",
+"vendor": "Elegoo",
+"type": "PET-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PETG @System",
+"vendor": "Elegoo",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PETG HF @System",
+"vendor": "Elegoo",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PETG PRO @System",
+"vendor": "Elegoo",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PETG Translucent @System",
+"vendor": "Elegoo",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PETG-CF @System",
+"vendor": "Elegoo",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PETG-GF @System",
+"vendor": "Elegoo",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA Basic @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA Galaxy @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA Glow @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA Marble @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA Matte @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA PRO @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA Silk @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA Sparkle @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA Translucent2 @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA Wood @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA+ @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo PLA-CF @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo Rapid PETG @System",
+"vendor": "Elegoo",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo Rapid PLA+ @System",
+"vendor": "Elegoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo Rapid TPU 95A @System",
+"vendor": "Elegoo",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Elegoo TPU 95A @System",
+"vendor": "Elegoo",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints ABS @System",
+"vendor": "Eolas Prints",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints ASA @System",
+"vendor": "Eolas Prints",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PETG @System",
+"vendor": "Eolas Prints",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PETG Transition @System",
+"vendor": "Eolas Prints",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PETG UV Resistant @System",
+"vendor": "Eolas Prints",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PLA Antibacterial @System",
+"vendor": "Eolas Prints",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PLA High Speed @System",
+"vendor": "Eolas Prints",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PLA INGEO 850 @System",
+"vendor": "Eolas Prints",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PLA INGEO 870 @System",
+"vendor": "Eolas Prints",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PLA Matte @System",
+"vendor": "Eolas Prints",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PLA Neon @System",
+"vendor": "Eolas Prints",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PLA Premium @System",
+"vendor": "Eolas Prints",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PLA Silk @System",
+"vendor": "Eolas Prints",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints PLA Transition @System",
+"vendor": "Eolas Prints",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints TPU D60 UV Resistant @System",
+"vendor": "Eolas Prints",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints TPU Flex 93A @System",
+"vendor": "Eolas Prints",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints TPU Flex D53 @System",
+"vendor": "Eolas Prints",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Eolas Prints TPU Transition @System",
+"vendor": "Eolas Prints",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "EverLoop rPETG Premium @System",
+"vendor": "EverLoop",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "EverLoop rPLA Premium @System",
+"vendor": "EverLoop",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "EverLoop rPLA Premium Matte @System",
+"vendor": "EverLoop",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FDplast ABS @System",
+"vendor": "FDplast",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FDplast HIPS @System",
+"vendor": "FDplast",
+"type": "HIPS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FDplast PETG @System",
+"vendor": "FDplast",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FDplast PLA @System",
+"vendor": "FDplast",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FDplast SBS @System",
+"vendor": "FDplast",
+"type": "SBS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FDplast TPU @System",
+"vendor": "FDplast",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FILL3D PA @System",
+"vendor": "FILL3D",
+"type": "PA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FILL3D PETG @System",
+"vendor": "FILL3D",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FILL3D PETG CF @System",
+"vendor": "FILL3D",
+"type": "PETG-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FILL3D PLA Basic @System",
+"vendor": "FILL3D",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FILL3D PLA Turbo @System",
+"vendor": "FILL3D",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FILL3D PP @System",
+"vendor": "FILL3D",
+"type": "PP",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FILL3D PPCF @System",
+"vendor": "FILL3D",
+"type": "PP",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Fiberon ASA-CF08 @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "ASA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Fiberon PA12-CF @System",
+"vendor": "Polymaker",
+"type": "PA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Fiberon PA12-CF10 @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PA-CF",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Fiberon PA6-CF @System",
+"vendor": "Polymaker",
+"type": "PA6-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Fiberon PA6-CF20 @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PA6-CF",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Fiberon PA6-GF @System",
+"vendor": "Polymaker",
+"type": "PA-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Fiberon PA612-CF @System",
+"vendor": "Polymaker",
+"type": "PA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Fiberon PA612-ESD @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PA-CF",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Fiberon PET-CF @System",
+"vendor": "Polymaker",
+"type": "PET-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Fiberon PETG-ESD @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Fiberon PETG-ESD @System",
+"vendor": "Polymaker",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Fiberon PETG-rCF @System",
+"vendor": "Polymaker",
+"type": "PETG-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Fiberon PPS-GF20 @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "ABS",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "FilAr PETG Amarillo Lima",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Amarillo Radiante",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Azul Boreal",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Azul Francia",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Azul Imperial",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Blanco Antartida",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Cian",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Coral",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Cristal",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Gris Ceniza",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Gris Plata",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Magenta",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Negro Azabache",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PETG Rojo Carmesi",
+"vendor": "FilAr",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Amarillo Lirio",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Azul Francia",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Blanco Antartida",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Blanco Calido",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Bronce",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Cafe con Leche",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Carpincho",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Celeste Cielo",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Cobre",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Dorado",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Gris Ceniza",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Gris Pizarra",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Gris Plata",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Manteca",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Marron Oxido",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Naranja Tigre",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Negro Azabache",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Oro",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Piel",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Rojo de Carreras",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Rosa Amaranto",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Rosa Flamenco",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Tabaco",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Titanio",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Verde FilAr",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Verde Manzana",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Verde Oliva",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Verde Pixel",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA Violeta Jacaranda",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Amarillo",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Azul",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Beige",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Blanco",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Bordo",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Celeste Cielo",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Chocolate",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Gris",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Marron",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Naranja",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Negro",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Piel",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Rojo",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Rosa",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Uva",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Verde",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FilAr PLA-mate Violeta",
+"vendor": "FilAr",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "FusRock ABS-GF @System",
+"vendor": "FusRock",
+"type": "ABS-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic ABS @System",
+"vendor": "Generic",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic ASA @System",
+"vendor": "Generic",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic BVOH @System",
+"vendor": "Generic",
+"type": "BVOH",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic CoPE @System",
+"vendor": "Generic",
+"type": "CoPE",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic EVA @System",
+"vendor": "Generic",
+"type": "EVA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic HIPS @System",
+"vendor": "Generic",
+"type": "HIPS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PA @System",
+"vendor": "Generic",
+"type": "PA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PA-CF @System",
+"vendor": "Generic",
+"type": "PA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PC @System",
+"vendor": "Generic",
+"type": "PC",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PCTG @System",
+"vendor": "Generic",
+"type": "PCTG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PE @System",
+"vendor": "Generic",
+"type": "PE",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PE-CF @System",
+"vendor": "Generic",
+"type": "PE-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PETG @System",
+"vendor": "Generic",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PETG @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Generic PETG HF @System",
+"vendor": "Generic",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PETG HF @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Generic PETG-CF @System",
+"vendor": "Generic",
+"type": "PETG-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PETG-CF @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "PETG-CF",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Generic PHA @System",
+"vendor": "Generic",
+"type": "PHA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PLA @System",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PLA @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Generic PLA High Speed @System",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PLA High Speed @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Generic PLA Matte @System",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PLA Silk @System",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PLA Silk @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Generic PLA-CF @System",
+"vendor": "Generic",
+"type": "PLA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PLA-CF @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "PLA-CF",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Generic PP @System",
+"vendor": "Generic",
+"type": "PP",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PP-CF @System",
+"vendor": "Generic",
+"type": "PP-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PP-GF @System",
+"vendor": "Generic",
+"type": "PP-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PPA-CF @System",
+"vendor": "Generic",
+"type": "PPA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PPA-GF @System",
+"vendor": "Generic",
+"type": "PPA-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic PVA @System",
+"vendor": "Generic",
+"type": "PVA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic SBS @System",
+"vendor": "Generic",
+"type": "SBS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic TPU @System",
+"vendor": "Generic",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Generic TPU @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "TPU",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Goofoo 90A TPU @System",
+"vendor": "Goofoo",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo 95A TPU @System",
+"vendor": "Goofoo",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo ABS @System",
+"vendor": "Goofoo",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo ASA @System",
+"vendor": "Goofoo",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PA @System",
+"vendor": "Goofoo",
+"type": "PA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PA-CF @System",
+"vendor": "Goofoo",
+"type": "PA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PA-GF10 @System",
+"vendor": "Goofoo",
+"type": "PA-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PE @System",
+"vendor": "Goofoo",
+"type": "PE",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PE-CF @System",
+"vendor": "Goofoo",
+"type": "PE-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PETG @System",
+"vendor": "Goofoo",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PETG HF @System",
+"vendor": "Goofoo",
+"type": "PETG HF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PETG-CF @System",
+"vendor": "Goofoo",
+"type": "PETG-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PHA @System",
+"vendor": "Goofoo",
+"type": "PHA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PLA @System",
+"vendor": "Goofoo",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PLA Silk @System",
+"vendor": "Goofoo",
+"type": "PLA Silk",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PLA-CF @System",
+"vendor": "Goofoo",
+"type": "PLA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PP @System",
+"vendor": "Goofoo",
+"type": "PP",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PP-CF @System",
+"vendor": "Goofoo",
+"type": "PP-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PP-GF @System",
+"vendor": "Goofoo",
+"type": "PP-GF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Goofoo PVA @System",
+"vendor": "Goofoo",
+"type": "PVA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "GreenGate3D PETG @System",
+"vendor": "GreenGate3D",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "JAYO PETG @System",
+"vendor": "JAYO",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "JAYO PLA @System",
+"vendor": "JAYO",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "JAYO PLA Classic @System",
+"vendor": "JAYO",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "NIT ABS @System",
+"vendor": "NIT",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "NIT PETG @System",
+"vendor": "NIT",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "NIT PLA @System",
+"vendor": "NIT",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Numakers PLA+ @System",
+"vendor": "Numakers",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture ABS Basic @System",
+"vendor": "Overture",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture ASA @System",
+"vendor": "Overture",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture Air PLA @System",
+"vendor": "Overture",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture Easy PLA @System",
+"vendor": "Overture",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture Matte PLA @System",
+"vendor": "Overture",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture PLA @System",
+"vendor": "Overture",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture PLA Pro @System",
+"vendor": "Overture",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture Rock PLA @System",
+"vendor": "Overture",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture Silk PLA @System",
+"vendor": "Overture",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture Super PLA+ @System",
+"vendor": "Overture",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Overture TPU @System",
+"vendor": "Overture",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma CoPE @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma CoPE @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Celestial @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Celestial @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Galaxy @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Galaxy @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Glow @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Glow @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Luminous @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Luminous @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Marble @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Marble @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Matte @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Matte @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Metallic @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Metallic @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Neon @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Neon @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Satin @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Satin @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Silk @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Silk @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Starlight @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Starlight @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Temp Shift @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Temp Shift @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Translucent @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA Translucent @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Panchroma PLA UV Shift @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Panchroma PLA UV Shift @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PlastAR PLA @System",
+"vendor": "PlastAR",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PolyLite ABS @System",
+"vendor": "Polymaker",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PolyLite ASA @System",
+"vendor": "Polymaker",
+"type": "ASA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PolyLite CosPLA @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite Dual PLA @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PolyLite PETG @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PETG @System",
+"vendor": "Polymaker",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PolyLite PETG Translucent @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PLA @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PLA @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PolyLite PLA Galaxy @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PLA Glow @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PLA Luminous @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PLA Neon @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PLA Pro @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PLA Pro @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PolyLite PLA Pro Metallic @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PLA Starlight @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyLite PLA Translucent @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyTerra Dual PLA @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PolyTerra PLA @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyTerra PLA @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "PolyTerra PLA Marble @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PolyTerra PLA+ @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker General PLA Family @U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker HT-PLA @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker HT-PLA @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Polymaker HT-PLA-GF @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker HT-PLA-GF @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Polymaker PETG @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker PETG Galaxy @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker PLA @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker PLA Pro @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker PLA Pro @System",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Polymaker PLA Pro Metallic @Snapmaker U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker Silk PLA Family @U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Polymaker Tough PLA Family @U1",
+"vendor": "Polymaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "PrintaLot ABS @System",
+"vendor": "PrintaLot",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Recycling Fabrik rABS @System",
+"vendor": "Recycling Fabrik",
+"type": "ABS",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Recycling Fabrik rPETG @System",
+"vendor": "Recycling Fabrik",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Recycling Fabrik rPLA @System",
+"vendor": "Recycling Fabrik",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "SUNLU PETG @System",
+"vendor": "SUNLU",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "SUNLU PLA Marble @System",
+"vendor": "SUNLU",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "SUNLU PLA Matte @System",
+"vendor": "SUNLU",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "SUNLU PLA+ 2.0 @System",
+"vendor": "SUNLU",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "SUNLU PLA+ @System",
+"vendor": "SUNLU",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "SUNLU Silk PLA+ @System",
+"vendor": "SUNLU",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "SUNLU Wood PLA @System",
+"vendor": "SUNLU",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "School House Spools Marble PLA @System",
+"vendor": "School House Spools",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "School House Spools Matte PETG @System",
+"vendor": "School House Spools",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "School House Spools Matte PLA @System",
+"vendor": "School House Spools",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "School House Spools PETG @System",
+"vendor": "School House Spools",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "School House Spools PLA @System",
+"vendor": "School House Spools",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "School House Spools Silk PLA @System",
+"vendor": "School House Spools",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "School House Spools TPU 95A @System",
+"vendor": "School House Spools",
+"type": "TPU",
+"printers": [],
+"condition": ""
+},
+{
+"name": "School House Spools Transparent PETG @System",
+"vendor": "School House Spools",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Snapmaker ABS @U1",
+"vendor": "Generic",
+"type": "ABS",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker ABS Benchy @U1",
+"vendor": "Generic",
+"type": "ABS",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker ASA @U1",
+"vendor": "Generic",
+"type": "ASA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker Breakaway Support For PLA @U1",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PA-CF @U1",
+"vendor": "Generic",
+"type": "PA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PET @U1",
+"vendor": "Generic",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PETG @U1",
+"vendor": "Generic",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PETG HF @U1 0.4 nozzle",
+"vendor": "Snapmaker",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PETG Translucent @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "PETG",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PETG-CF @U1",
+"vendor": "Generic",
+"type": "PETG-CF",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA @U1",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Basic @U1",
+"vendor": "Snapmaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Eco @U1",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Full Spectrum @U1 0.4 nozzle",
+"vendor": "Snapmaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Glow @U1 0.4 nozzle",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Lite @U1",
+"vendor": "Snapmaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Matte @U1",
+"vendor": "Snapmaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Metal @U1",
+"vendor": "Generic",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Silk @U1",
+"vendor": "Snapmaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA SnapSpeed @U1",
+"vendor": "Snapmaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Translucent @U1 0.4 nozzle",
+"vendor": "Snapmaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA Wood @U1 0.4 nozzle",
+"vendor": "Snapmaker",
+"type": "PLA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PLA-CF @U1 0.4 nozzle",
+"vendor": "Snapmaker",
+"type": "PLA-CF",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker PVA @U1",
+"vendor": "Generic",
+"type": "PVA",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker TPE @U1",
+"vendor": "Generic",
+"type": "TPU",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker TPU 90A @U1",
+"vendor": "Snapmaker",
+"type": "TPU",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker TPU 95A @U1",
+"vendor": "Snapmaker",
+"type": "TPU",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker TPU 95A HF @U1",
+"vendor": "Snapmaker",
+"type": "TPU",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker TPU @U1",
+"vendor": "Generic",
+"type": "TPU",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Snapmaker TPU High-Flow @U1",
+"vendor": "Generic",
+"type": "TPU",
+"printers": [
+"Snapmaker U1 (0.4 nozzle)"
+],
+"condition": ""
+},
+{
+"name": "Valment PLA @System",
+"vendor": "Valment",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Valment PLA Galaxy @System",
+"vendor": "Valment",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Valment PLA Silk @System",
+"vendor": "Valment",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "Valment PLA-CF @System",
+"vendor": "Valment",
+"type": "PLA-CF",
+"printers": [],
+"condition": ""
+},
+{
+"name": "eSUN PETG @System",
+"vendor": "eSUN",
+"type": "PETG",
+"printers": [],
+"condition": ""
+},
+{
+"name": "eSUN PLA+ @System",
+"vendor": "eSUN",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "eSUN PLA-Basic @System",
+"vendor": "eSUN",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "eSUN PLA-Marble @System",
+"vendor": "eSUN",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "eSUN PLA-Matte @System",
+"vendor": "eSUN",
+"type": "PLA",
+"printers": [],
+"condition": ""
+},
+{
+"name": "eSUN ePLA-LW @System",
+"vendor": "eSUN",
+"type": "PLA-AERO",
+"printers": [],
+"condition": ""
+}
+]

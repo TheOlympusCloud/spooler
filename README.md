@@ -10,34 +10,44 @@ the rest is automatic.
 
 ## What the fork adds
 
-- **Your Spoolman filaments become OrcaSlicer filament presets.** Every filament with a spool in
-  stock shows up under ***User presets*** in the sidebar's filament dropdown, already set to its
-  colour, vendor, material, nozzle and bed temperatures, density, diameter and cost. Pick it for a
-  slot and the colour comes with it. No more editing colours or cloning profiles. The presets
-  follow Spoolman: new filaments appear, filaments whose spools are all archived disappear, and
-  changes are picked up on each refresh (every 60 seconds while the Spooler tab is open).
-  Each preset inherits the vendor's own system preset when OrcaSlicer has one (for example
-  `SUNLU PETG @System`), otherwise the matching `Generic ... @System` preset, so print settings
-  you have tuned in those still apply. They are compatible with every printer.
-- **Klipper/Moonraker printers are found for you.** Any printer preset with a host address
-  (Printer settings > Connection) appears in the ***Printer*** tab with no further setup:
-  - **Snapmaker U1:** all four toolheads, read from the printer, matched to your Spoolman spools by
-    RFID tag, or else by vendor, material and colour.
-  - **Single-extruder Klipper printers (e.g. Sovol SV06 ACE):** the spool Moonraker's Spoolman
-    integration has marked as active.
-  Each slot shows which OrcaSlicer preset matches it.
-- **Plugins > Run > "Spooler: Load Printer Filaments"** puts the filament each toolhead holds into
-  the plate's filament slots in one click, for the printer currently selected.
+- **Your Spoolman filaments become OrcaSlicer filament presets, one per printer.** For each of your
+  printers, every Spoolman filament with a spool in stock shows up under ***User presets*** in the
+  sidebar's filament dropdown, for example `3D Procer PLA Pérola @Snapmaker U1` and
+  `3D Procer PLA Pérola @Sovol SV06`. Pick it for a slot and OrcaSlicer sets the slot to the
+  filament's colour. No more editing colours or cloning profiles.
+  - Each preset inherits the closest preset OrcaSlicer already has **for that printer**, so the
+    printer's own tuning is kept: Snapmaker SnapSpeed spools on the U1 get
+    `Snapmaker PLA SnapSpeed @U1`, other PLA gets `Generic PLA @U1 0.4 nozzle`, silk gets the silk
+    preset, and so on. The vendor's own preset wins when OrcaSlicer has one.
+  - On top of that it carries the filament's colour, vendor, nozzle and bed temperatures, density,
+    diameter and cost from Spoolman.
+  - The presets follow Spoolman: new filaments appear, filaments whose spools are all archived
+    disappear, and changes are picked up on each refresh (every 60 seconds while the Spooler tab
+    is open).
+  - "Your printers" are the printers behind every printer preset with a host address
+    (Printer settings > Connection), plus the printer currently selected.
+- **Klipper/Moonraker printers are found for you.** Any printer preset with a host address appears
+  in the ***Printer*** tab with no further setup:
+  - **Snapmaker U1:** all four toolheads, matched to your Spoolman spools by the spool id the
+    printer reports, else by RFID tag, else by vendor, material and colour.
+  - **Single-extruder Klipper printers (e.g. Sovol SV06 with Klipper):** the spool Moonraker's
+    Spoolman integration has marked as active.
+  Each slot shows which OrcaSlicer preset matches it. Hosts that aren't Moonraker are ignored.
+- **Plugins > Run > "Spooler: Load Printer Filaments"** puts the preset for the filament each
+  toolhead holds into the plate's filament slots, for the printer currently selected.
 
 Everything Spoolio already did is still there: spool cards, the Bambu Cloud source, Bambu Live
 Link, filament usage booking and the after-slice filament check.
 
 ### Limits
 
-- Needs a current OrcaSlicer **nightly** with the plugin preset APIs
-  (`orca.host.preset.bundles.reload_local` and `orca.host.preset.filament.begin_update`).
+- Needs a current OrcaSlicer with the plugin preset APIs
+  (`orca.host.preset.bundles.reload_local` and `orca.host.preset.filament.begin_update`);
+  tested against OrcaSlicer 2.5.0.
 - OrcaSlicer only lets a plugin assign presets to the plate's slots from a ***Plugins > Run***
-  action, not from a tab, so loading the printer's filaments takes that one click.
+  action, and gives plugins no way to change a slot's colour. "Load Printer Filaments" therefore
+  sets the right presets but leaves the slot colours as they were; picking the filament in the
+  slot's dropdown sets the colour.
 - Generated presets are owned by Spooler and are rewritten from Spoolman, so edit the filament in
   Spoolman (or save a copy of the preset under a new name) rather than editing them in OrcaSlicer.
 - Anycubic Kobra X live slots are planned. Until then, add it as a manual printer in the Printer

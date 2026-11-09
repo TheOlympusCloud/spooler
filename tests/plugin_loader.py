@@ -1,7 +1,9 @@
 """Import the plugin outside OrcaSlicer, with a stand-in for the embedded `orca` module."""
 
 import importlib.util
+import os
 import sys
+import tempfile
 import types
 from pathlib import Path
 
@@ -42,8 +44,14 @@ def _stub_orca() -> types.ModuleType:
     return orca
 
 
+_HOME = tempfile.mkdtemp(prefix="spooler-tests-")
+
+
 def load():
-    """(plugin module, stub orca module)."""
+    """(plugin module, stub orca module). The plugin's settings and log go to a temporary
+    folder, never to a real OrcaSlicer install."""
+    for key in ("HOME", "APPDATA", "XDG_CONFIG_HOME"):
+        os.environ[key] = _HOME
     orca = _stub_orca()
     spec = importlib.util.spec_from_file_location("spooler_plugin", PLUGIN)
     module = importlib.util.module_from_spec(spec)
