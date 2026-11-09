@@ -1,0 +1,64 @@
+name: Release
+
+# Push a tag like v0.2.0 to open a DRAFT GitHub release with the plugin built for
+# every operating system.
+# Review the draft, then click "Publish release" - that is what triggers the
+# Orca Cloud publish workflow (publish-orcacloud.yml).
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+permissions:
+  contents: write
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Check the tag matches the plugin version
+        run: python scripts/check_version.py "$GITHUB_REF_NAME"
+
+      - name: Build the plugin for every OS
+        run: python scripts/build.py
+
+      - name: Take the release notes from CHANGELOG.md
+        run: |
+          awk -v v="${GITHUB_REF_NAME#v}" '
+            /^## \[/ { if (found) exit; found = index($0, "[" v "]") > 0; next }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "CHANGELOG.md has no section for ${GITHUB_REF_NAME#v}" >&2
+            exit 1
+          fi
+
+      - name: Render the Orca Cloud store image
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+          rsvg-convert -w 512 -h 512 assets/spoolio-icon.svg \
+            -o spoolio-store-image.png
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=()
+          # Only suffixed tags (v1.0.0-rc1) are pre-releases: GitHub's "latest
+          # release" API, used by the plugin's update check, skips pre-releases.
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            flags+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" \
+            dist/*.py \
+            spoolio-store-image.png \
+            --draft "${flags[@]}" \
+            --title "Spoolio ${GITHUB_REF_NAME}" \
+            --notes-file release-notes.md
