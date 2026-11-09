@@ -3,10 +3,10 @@
 # dependencies = []
 #
 # [tool.orcaslicer.plugin]
-# name = "Spoolio"
-# description = "A Bambu Lab inspired inventory management overview for OrcaSlicer"
-# author = "Dan J Moore"
-# version = "0.8.4"
+# name = "Spooler"
+# description = "Spoolman inventory for OrcaSlicer: auto-synced filament profiles and live printer slots"
+# author = "bloodf (fork of Spoolio by Dan J Moore)"
+# version = "0.9.0"
 # ///
 
 import base64
@@ -43,22 +43,22 @@ except (ImportError, AttributeError):
 
 _SLICING = hasattr(getattr(orca, "slicing", None), "SlicingPipelineCapabilityBase")
 
-PLUGIN_NAME = "Spoolio"
-PLUGIN_VERSION = "0.8.4"
+PLUGIN_NAME = "Spooler"
+PLUGIN_VERSION = "0.9.0"
 # Stamped per operating system by scripts/build.py.
 BUILD_TARGET = "any"
 
 DEFAULT_SPOOLMAN_URL = "http://raspberrypi:7912"
 LOW_DEFAULT = 100  # grams
 
-FEEDBACK_URL = "https://github.com/danm1989/spoolio-orcaslicer/issues"
-RELEASE_API = "https://api.github.com/repos/danm1989/spoolio-orcaslicer/releases/latest"
+FEEDBACK_URL = "https://github.com/bloodf/spooler/issues"
+RELEASE_API = "https://api.github.com/repos/bloodf/spooler/releases/latest"
 
 # webbrowser can only open a URL; it can't use the browser's default search engine.
 SEARCH_URL = "https://www.google.com/search?q={query}"
 
-SETTINGS_FILENAME = "spoolio_settings.json"
-LOG_FILENAME = "spoolio.log"
+SETTINGS_FILENAME = "spooler_settings.json"
+LOG_FILENAME = "spooler.log"
 LOG_MAX = 256 * 1024
 
 TIMEOUT = 5  # seconds
@@ -97,8 +97,8 @@ def _data_dir() -> Path:
     """
     for parent in PLUGIN_DIR.parents:
         if parent.name == "OrcaSlicer":
-            return parent / "spoolio"
-    return _config_root() / "OrcaSlicer" / "spoolio"
+            return parent / "spooler"
+    return _config_root() / "OrcaSlicer" / "spooler"
 
 
 DATA_DIR = _data_dir()
@@ -107,7 +107,7 @@ LOG_FILE = DATA_DIR / LOG_FILENAME
 # Where earlier builds kept settings when OrcaSlicer's data folder wasn't found.
 OLD_SETTINGS = PLUGIN_DIR / SETTINGS_FILENAME
 
-log = logging.getLogger("spoolio")
+log = logging.getLogger("spooler")
 log.setLevel(logging.INFO)
 log.propagate = False
 log.addHandler(logging.NullHandler())
@@ -394,7 +394,7 @@ def _bambu_post(region: str, path: str, body: dict, host: str = "") -> tuple[dic
     try:
         data = json.loads(raw) if raw.strip() else {}
     except ValueError:
-        raise BambuError("Bambu Cloud sent a reply Spoolio doesn't understand") from None
+        raise BambuError("Bambu Cloud sent a reply Spooler doesn't understand") from None
     return (data if isinstance(data, dict) else {}), cookies
 
 
@@ -477,7 +477,7 @@ def _bambu_page(auth: dict, offset: int) -> dict:
     if isinstance(data, dict) and "hits" not in data and isinstance(data.get("data"), dict):
         data = data["data"]
     if not isinstance(data, dict) or not isinstance(data.get("hits"), list):
-        raise ValueError("Bambu Cloud sent a reply Spoolio doesn't understand")
+        raise ValueError("Bambu Cloud sent a reply Spooler doesn't understand")
     return data
 
 
@@ -703,7 +703,7 @@ def _mqtt_packet(first: int, body: bytes) -> bytes:
 
 def _mqtt_connect(user: str, password: str) -> bytes:
     body = _mqtt_str("MQTT") + b"\x04\xc2" + struct.pack("!H", 60)
-    body += _mqtt_str("spoolio-" + os.urandom(4).hex()) + _mqtt_str(user) + _mqtt_str(password)
+    body += _mqtt_str("spooler-" + os.urandom(4).hex()) + _mqtt_str(user) + _mqtt_str(password)
     return _mqtt_packet(0x10, body)
 
 
@@ -1473,7 +1473,7 @@ def _missed(dev_id: str, info: dict) -> None:
             return
     items = _try_fetch(dev_id, ident)
     if not items:
-        log.info("A print ended while Spoolio was away and its job file couldn't be read")
+        log.info("A print ended while Spooler was away and its job file couldn't be read")
         return
     with _live_lock:
         state = _live["printers"].get(dev_id)
@@ -1672,7 +1672,7 @@ def get_release() -> dict:
         RELEASE_API,
         headers={
             "Accept": "application/vnd.github+json",
-            "User-Agent": f"Spoolio/{PLUGIN_VERSION}",
+            "User-Agent": f"Spooler/{PLUGIN_VERSION}",
         },
     )
     try:
@@ -1951,7 +1951,7 @@ def plate_notice(results: list[dict]) -> tuple[str, str] | None:
             parts.append(sentence if parts else sentence[:1].lower() + sentence[1:])
         if not parts:
             return None
-    return kind, "Spoolio: " + " ".join(parts)
+    return kind, "Spooler: " + " ".join(parts)
 
 
 def fit_text(text: str, limit: int = NOTICE_MAX) -> str:
@@ -2089,10 +2089,10 @@ def check_plate(slots: list[dict], margin: int, fresh: bool = False) -> tuple[tu
         _spool_cache["time"] = float("-inf")
     spools = plate_spools(key) if key else None
     if not key:
-        return ("info", "Spoolio: no Spoolman address is set up yet, "
+        return ("info", "Spooler: no Spoolman address is set up yet, "
                         "so the filament quantity wasn't checked."), None
     if spools is None:
-        return ("info", f"Spoolio: couldn't reach {source_name()}, "
+        return ("info", f"Spooler: couldn't reach {source_name()}, "
                         "so the filament quantity wasn't checked."), None
     results = [check_group(group, spools, margin) for group in group_slots(slots)]
     log.info("Plate check: %s", ", ".join(
@@ -2158,7 +2158,7 @@ TAB_ICON_SVG = (
     '<circle cx="12" cy="12" r="2"/>'
     '</svg>'
 )
-TAB_ICON_FILE = DATA_DIR / "spoolio_tab.svg"
+TAB_ICON_FILE = DATA_DIR / "spooler_tab.svg"
 
 
 def icon_path() -> str:
@@ -2594,7 +2594,7 @@ MAIN_PAGE = """
     let usageUndoing = false;
     let rbUndo = null;
     let rbOpen = false;
-    try { rbOpen = localStorage.getItem("spoolio.bookings") === "1"; } catch (err) {}
+    try { rbOpen = localStorage.getItem("spooler.bookings") === "1"; } catch (err) {}
     let plateAttn = false;
     const usageSlot = document.getElementById("usage-slot");
     const progSlot = document.getElementById("progress-slot");
@@ -2605,7 +2605,7 @@ MAIN_PAGE = """
     let picking = null;
     const KINDS = { ams: 4, ht: 1, ext: 1 };
     const RANK = { ams: 0, ht: 1, ext: 2 };
-    try { if (localStorage.getItem("spoolio.tab") === "printer") tab = "printer"; } catch (err) {}
+    try { if (localStorage.getItem("spooler.tab") === "printer") tab = "printer"; } catch (err) {}
 
     function esc(v) {
       return String(v).replace(/[&<>"]/g, function (c) {
@@ -2751,7 +2751,7 @@ MAIN_PAGE = """
             (r.error ? '<div class="u-err">' + esc(r.error) + '</div>' : "") + '</div>';
         }).join("");
       const note = p.state !== "pending" ? "" :
-        p.late ? "Spoolio lost contact with the printer during this print, so check the grams before booking." :
+        p.late ? "Spooler lost contact with the printer during this print, so check the grams before booking." :
         p.result === "finished" ? "" : "The print did not finish, so the grams are an estimate from its progress.";
       return '<div class="u-card' + (p.state === "undone" ? " undone" : "") + '" data-run="' + esc(p.id) + '"><div class="u-h"><b>' + esc(p.name) + '</b>' +
         '<span class="sub">' + esc(p.printer) + ' · ' + result + ' · ' + rbWhen(p.time) + '</span>' + chip + btn + '</div>' + rows +
@@ -2772,7 +2772,7 @@ MAIN_PAGE = """
       const many = rows.length > 1;
       return '<div class="rb-mask" data-usage="cancel"><div class="rb-pop"><b class="t">Undo This Booking?</b>' +
         '<div>' + esc(p.name) + ' used ' + usageGrams(rbTotal({ rows: rows })) + (many ? ' from ' + rows.length + ' spools' : '') +
-        '. Spoolio will add it back to ' + (many ? 'each spool' : 'the spool') + ' in Spoolman.</div>' +
+        '. Spooler will add it back to ' + (many ? 'each spool' : 'the spool') + ' in Spoolman.</div>' +
         '<div class="rb-tbl">' + spools + '</div>' +
         '<div class="sub">The print stays in Recent Bookings, so you can book it again later.</div>' +
         '<div class="rb-bar"><button class="sbtn ghost" data-usage="cancel">Cancel</button><button class="sbtn primary" data-usage="unbook"' +
@@ -2838,7 +2838,7 @@ MAIN_PAGE = """
       const card = e.target.closest(".u-card");
       if (kind === "toggle") {
         rbOpen = !rbOpen;
-        try { localStorage.setItem("spoolio.bookings", rbOpen ? "1" : "0"); } catch (err) {}
+        try { localStorage.setItem("spooler.bookings", rbOpen ? "1" : "0"); } catch (err) {}
       } else if (kind === "cancel") {
         if (e.target !== btn || usageUndoing) return;
         rbUndo = null;
@@ -2890,7 +2890,7 @@ MAIN_PAGE = """
         '<button class="sbtn ghost" data-act="link-cancel" data-p="' + esc(p.id) + '">Cancel</button>' +
         (p.ip ? '<button class="sbtn ghost" data-act="link-remove" data-p="' + esc(p.id) + '">Remove Link</button>' : "") + '</div>' +
         '<div class="ams-note" style="flex-basis: 100%; margin: 0">The IP address and access code are in the printer&#39;s network settings, with LAN mode on. ' +
-        'Spoolio keeps the access code on this computer and only reads from the printer.</div></div>';
+        'Spooler keeps the access code on this computer and only reads from the printer.</div></div>';
     }
 
     function liveCard(t) {
@@ -3158,7 +3158,7 @@ MAIN_PAGE = """
       const b = e.target.closest("button");
       if (!b) return;
       tab = b.dataset.tab;
-      try { localStorage.setItem("spoolio.tab", tab); } catch (err) {}
+      try { localStorage.setItem("spooler.tab", tab); } catch (err) {}
       updateTabs();
     });
 
@@ -3346,7 +3346,7 @@ MAIN_PAGE = """
     function setFilters(open) {
       fPanel.hidden = !open;
       fToggle.setAttribute("aria-expanded", open ? "true" : "false");
-      try { localStorage.setItem("spoolio.filters", open ? "1" : "0"); } catch (err) {}
+      try { localStorage.setItem("spooler.filters", open ? "1" : "0"); } catch (err) {}
       filterLabel();
     }
 
@@ -3716,7 +3716,7 @@ MAIN_PAGE = """
       orca.postMessage({ type: "settings" });
     });
     fToggle.addEventListener("click", function () { setFilters(fPanel.hidden); });
-    try { setFilters(localStorage.getItem("spoolio.filters") === "1"); } catch (err) { setFilters(false); }
+    try { setFilters(localStorage.getItem("spooler.filters") === "1"); } catch (err) { setFilters(false); }
     document.getElementById("plate-recheck").addEventListener("click", function () {
       orca.postMessage({ type: "plate_recheck" });
     });
@@ -3919,7 +3919,7 @@ SETTINGS_PAGE = """
     <input id="plate-margin" type="number" min="0" max="50" step="5" value="__PLATE_MARGIN__">
   </div>
 <!--/check-->
-  <!--check-hint--><div class="hint">OrcaSlicer also has to run the check: switch on Spoolio Filament Check in your process settings, under <span style="white-space: nowrap">Others &gt; Slicing Pipeline Plugin</span>.</div><!--/check-hint-->
+  <!--check-hint--><div class="hint">OrcaSlicer also has to run the check: switch on Spooler Filament Check in your process settings, under <span style="white-space: nowrap">Others &gt; Slicing Pipeline Plugin</span>.</div><!--/check-hint-->
 
   <div class="divider spaced"></div>
 
@@ -3979,7 +3979,7 @@ SETTINGS_PAGE = """
   <div class="divider spaced"></div>
 
   <!--server--><h3><span class="emoji">\U0001F310</span>Choose Your Source</h3>
-  <div class="field-label">Where should Spoolio read your spools from?</div>
+  <div class="field-label">Where should Spooler read your spools from?</div>
   <div class="seg" id="src-seg">
     <label><input type="radio" name="spool-source" value="spoolman">Spoolman</label>
     <label><input type="radio" name="spool-source" value="bambu">Bambu Cloud</label>
@@ -4021,7 +4021,7 @@ SETTINGS_PAGE = """
     </div>
     <div class="status pending" id="bambu-status">__BAMBU_STATUS__</div>
     <div class="hint warn"><strong>!</strong> Experimental: this uses Bambu's unofficial cloud
-    service, which Bambu can change at any time. Spoolio never stores your password.</div>
+    service, which Bambu can change at any time. Spooler never stores your password.</div>
   </div><!--/server-->
 
   <!--about--><div class="about">
@@ -4298,7 +4298,7 @@ def main_html() -> str:
         LOGO=LOGO_IMG,
         LOGODATA=LOGO_DATA_URI,
         FONT=FONT_STACK,
-        PLUGIN_NAME="Spoolio",
+        PLUGIN_NAME="Spooler",
         LOW_STOCK_DEFAULT=LOW_DEFAULT,
         REFRESH_MS=REFRESH_SECS * 1000,
     )
@@ -4324,7 +4324,7 @@ def settings_html(current_url: str, spoolman_info: dict, low_stock_grams: float,
         LOGO=LOGO_IMG,
         LOGODATA=LOGO_DATA_URI,
         FONT=FONT_STACK,
-        PLUGIN_NAME="Spoolio",
+        PLUGIN_NAME="Spooler",
         VERSION=PLUGIN_VERSION,
         DEFAULT_URL=html.escape(DEFAULT_SPOOLMAN_URL),
         URL=html.escape(current_url or DEFAULT_SPOOLMAN_URL),
@@ -4577,7 +4577,7 @@ TAB_BRIDGE = """
       onMessage: function (handler) { handlers.push(handler); },
     };
   }
-  window.__spoolio = { main: bridge(null), settings: bridge("settings") };
+  window.__spooler = { main: bridge(null), settings: bridge("settings") };
 
   handlers.push(function (data) {
     if (!data || data.type !== "show_view") return;
@@ -4623,7 +4623,7 @@ def tab_html(initial_view: str, current_url: str, low_stock_grams: float,
              progress: dict | None = None, columns: int = 1) -> str:
     """The spool list and Settings as two views of one page, under a shared header.
 
-    Built from the standalone pages, which SpoolioWindow still shows as separate windows.
+    Built from the standalone pages, which SpoolerWindow still shows as separate windows.
     """
     main_css, main_body, main_js = _split_page(main_html())
     settings_css, settings_body, settings_js = _split_page(settings_html(
@@ -4679,7 +4679,7 @@ def tab_html(initial_view: str, current_url: str, low_stock_grams: float,
 </head>
 <body>
 <div id="app-header">
-  {LOGO_IMG}<h2>Spoolio</h2>
+  {LOGO_IMG}<h2>Spooler</h2>
   <span id="tabs-main" class="{_hidden(not on_main)}">{tabs_bar}</span>
   <div class="header-actions">
     <span id="actions-main" class="{_hidden(not on_main)}">{settings_button}</span>
@@ -4689,15 +4689,15 @@ def tab_html(initial_view: str, current_url: str, low_stock_grams: float,
 <div id="view-main" class="view {_hidden(not on_main)}">{main_body}</div>
 <div id="view-settings" class="view {_hidden(on_main)}">{settings_view}</div>
 <script>{TAB_BRIDGE}</script>
-<script>(function (orca) {{{main_js}}})(window.__spoolio.main);</script>
-<script>(function (orca) {{{settings_js}}})(window.__spoolio.settings);</script>
-<script>(function (bridge) {{{TAB_PREVIEW_JS}}})(window.__spoolio.settings);</script>
+<script>(function (orca) {{{main_js}}})(window.__spooler.main);</script>
+<script>(function (orca) {{{settings_js}}})(window.__spooler.settings);</script>
+<script>(function (bridge) {{{TAB_PREVIEW_JS}}})(window.__spooler.settings);</script>
 </body>
 </html>
 """
 
 
-class SpoolioWindow(orca.script.ScriptPluginCapabilityBase):
+class SpoolerWindow(orca.script.ScriptPluginCapabilityBase):
     def __init__(self):
         super().__init__()
         self._panel = None
@@ -4975,11 +4975,11 @@ class _SettingsView:
 
 if _PAGES:
 
-    class SpoolioPage(orca.pages.PagesPluginCapabilityBase):
-        """The Spoolio tab, with Settings as a second view inside it.
+    class SpoolerPage(orca.pages.PagesPluginCapabilityBase):
+        """The Spooler tab, with Settings as a second view inside it.
 
-        Used instead of SpoolioWindow when orca.pages exists. Its settings methods duplicate
-        SpoolioWindow's rather than share a mixin, to avoid multiple inheritance with a
+        Used instead of SpoolerWindow when orca.pages exists. Its settings methods duplicate
+        SpoolerWindow's rather than share a mixin, to avoid multiple inheritance with a
         pybind11 base class.
         """
 
@@ -5228,11 +5228,11 @@ if _PAGES:
 
 if _SLICING:
 
-    class SpoolioFilamentCheck(orca.slicing.SlicingPipelineCapabilityBase):
+    class SpoolerFilamentCheck(orca.slicing.SlicingPipelineCapabilityBase):
         """After each slice, checks the plate's filament against the spools in Spoolman."""
 
         def get_name(self):
-            return "Spoolio Filament Check"
+            return "Spooler Filament Check"
 
         def execute(self, ctx):
             try:
@@ -5257,11 +5257,11 @@ if _SLICING:
 
 
 @orca.plugin
-class SpoolioPlugin(orca.base):
+class SpoolerPlugin(orca.base):
     def register_capabilities(self):
         if _PAGES:
-            orca.register_capability(SpoolioPage)
+            orca.register_capability(SpoolerPage)
         else:
-            orca.register_capability(SpoolioWindow)
+            orca.register_capability(SpoolerWindow)
         if _SLICING:
-            orca.register_capability(SpoolioFilamentCheck)
+            orca.register_capability(SpoolerFilamentCheck)

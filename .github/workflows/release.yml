@@ -43,8 +43,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y librsvg2-bin
-          rsvg-convert -w 512 -h 512 assets/spoolio-icon.svg \
-            -o spoolio-store-image.png
+          rsvg-convert -w 512 -h 512 assets/spooler-icon.svg \
+            -o spooler-store-image.png
 
       - name: Create draft release
         env:
@@ -58,7 +58,7 @@ jobs:
           fi
           gh release create "$GITHUB_REF_NAME" \
             dist/*.py \
-            spoolio-store-image.png \
+            spooler-store-image.png \
             --draft "${flags[@]}" \
-            --title "Spoolio ${GITHUB_REF_NAME}" \
+            --title "Spooler ${GITHUB_REF_NAME}" \
             --notes-file release-notes.md

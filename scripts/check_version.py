@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PLUGIN = ROOT / "plugin" / "spoolio" / "spoolio_any.py"
+PLUGIN = ROOT / "plugin" / "spooler" / "spooler_any.py"
 
 
 def read_versions(text):

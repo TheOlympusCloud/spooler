@@ -12,7 +12,7 @@ body:
   - type: input
     id: plugin
     attributes:
-      label: Spoolio version
+      label: Spooler version
       placeholder: "0.1.0"
     validations:
       required: true
@@ -44,5 +44,5 @@ body:
     id: logs
     attributes:
       label: Log output
-      description: Paste the end of spoolio.log (its path is shown at the bottom of the plugin's Settings page). Also useful - the plugin's Diagnostics tab in OrcaSlicer.
+      description: Paste the end of spooler.log (its path is shown at the bottom of the plugin's Settings page). Also useful - the plugin's Diagnostics tab in OrcaSlicer.
       render: text

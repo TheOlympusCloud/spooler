@@ -38,7 +38,7 @@ def build(targets):
         shutil.rmtree(DIST)
     DIST.mkdir()
     for target in targets:
-        out = DIST / f"spoolio_{target}.py"
+        out = DIST / f"spooler_{target}.py"
         stamped = text.replace(MARKER, f'BUILD_TARGET = "{target}"\n')
         out.write_text(stamped, encoding="utf-8", newline="\n")
         print(f"built {out.relative_to(ROOT)}")

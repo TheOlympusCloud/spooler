@@ -1,5 +1,5 @@
 # Tooling config only - the plugin itself is a single file with PEP 723
-# metadata at the top of plugin/spoolio/spoolio_any.py.
+# metadata at the top of plugin/spooler/spooler_any.py.
 [tool.ruff]
 line-length = 100
 target-version = "py312"
