@@ -11,6 +11,7 @@
 
 import base64
 import ftplib
+import hashlib
 import html
 import json
 import logging
@@ -614,6 +615,228 @@ def load_spools() -> dict:
     for sp in result.get("spools") or []:
         sp["rfid_tags"] = sorted(spool_tags(sp))
     return result
+
+# --- Filament profiles -------------------------------------------------------------------
+# One OrcaSlicer filament preset per Spoolman filament, written as a local preset bundle and
+# hot-reloaded, so each filament shows up under "User presets" in the sidebar's filament
+# dropdown with its own colour, vendor, material and temperatures.
+
+PROFILE_BUNDLE = "spooler"
+PROFILE_STATE = ".spooler-profiles.json"
+PROFILE_PREFIX = f"_local/{PROFILE_BUNDLE}/"
+PROFILE_FALLBACK = "Generic PLA @System"
+# Spoolman material spellings to the material OrcaSlicer's generic library uses.
+MATERIAL_ALIASES = {
+    "PLA+": "PLA", "PLAPLUS": "PLA", "PLAPRO": "PLA", "HSPLA": "PLA High Speed",
+    "PLAHS": "PLA High Speed", "HIGHSPEEDPLA": "PLA High Speed", "SILKPLA": "PLA Silk",
+    "PLASILK": "PLA Silk", "MATTEPLA": "PLA Matte", "PLAMATTE": "PLA Matte", "PETG+": "PETG",
+    "HSPETG": "PETG HF", "PETGHS": "PETG HF", "ABS+": "ABS", "TPU95A": "TPU", "TPU98A": "TPU",
+    "TPU85A": "TPU", "NYLON": "PA", "PACF": "PA-CF", "PETGCF": "PETG-CF", "PLACF": "PLA-CF",
+}
+BED_TEMP_KEYS = ("hot_plate_temp", "hot_plate_temp_initial_layer",
+                 "textured_plate_temp", "textured_plate_temp_initial_layer")
+_profiles: dict = {"hash": "", "names": {}, "error": "", "count": 0}
+
+
+def _material_key(material: object) -> str:
+    return re.sub(r"[^A-Z0-9+]", "", str(material or "").upper())
+
+
+def profile_parent(vendor: str, material: str, names: set[str]) -> str:
+    """The system preset a generated profile inherits from, preferring the vendor's own."""
+    mat = str(material or "").strip()
+    alias = MATERIAL_ALIASES.get(_material_key(mat), mat)
+    for candidate in (f"{vendor} {mat} @System", f"{vendor} {alias} @System",
+                      f"Generic {mat} @System", f"Generic {alias} @System"):
+        if candidate.strip() and candidate in names:
+            return candidate
+    base = alias.split()[0].split("-")[0] if alias else ""
+    candidate = f"Generic {base} @System"
+    return candidate if candidate in names else PROFILE_FALLBACK
+
+
+def _safe_name(text: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r'[\\/:*?"<>|;]', " ", text)).strip()[:80]
+
+
+def profile_name(filament: dict) -> str:
+    vendor = str((filament.get("vendor") or {}).get("name") or "").strip()
+    name = str(filament.get("name") or "").strip()
+    material = str(filament.get("material") or "").strip()
+    if material and _norm(material) not in _norm(name):
+        name = f"{material} {name}".strip()
+    if vendor and _norm(vendor) not in _norm(name):
+        name = f"{vendor} {name}"
+    return _safe_name(name) or f"Spoolman filament {filament.get('id')}"
+
+
+def _num(value: object) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
+        return None
+    return value
+
+
+def _fmt(value: float) -> str:
+    return str(int(value)) if float(value).is_integer() else f"{value:.4g}"
+
+
+def profile_colour(filament: dict) -> str:
+    multi = str(filament.get("multi_color_hexes") or "").split(",")
+    return _hex6(filament.get("color_hex")) or _hex6(multi[0].strip()) or "FFFFFF"
+
+
+def profile_preset(filament: dict, name: str, parent: str) -> dict:
+    """The preset JSON for one Spoolman filament; values are lists, as OrcaSlicer stores them."""
+    vendor = str((filament.get("vendor") or {}).get("name") or "").strip()
+    preset = {
+        "type": "filament", "name": name, "from": "User", "instantiation": "true",
+        "inherits": parent, "version": "1.0.0", "compatible_printers": [],
+        "compatible_printers_condition": "",
+        "filament_settings_id": [name],
+        "filament_id": f"SPLR{int(filament.get('id') or 0):05d}",
+        "filament_colour": ["#" + profile_colour(filament)],
+    }
+    if vendor:
+        preset["filament_vendor"] = [vendor]
+    extruder, bed = _num(filament.get("settings_extruder_temp")), _num(filament.get("settings_bed_temp"))
+    if extruder:
+        preset["nozzle_temperature"] = [_fmt(extruder)]
+        preset["nozzle_temperature_initial_layer"] = [_fmt(extruder)]
+    if bed:
+        for key in BED_TEMP_KEYS:
+            preset[key] = [_fmt(bed)]
+    for key, field in (("filament_density", "density"), ("filament_diameter", "diameter"),
+                       ("filament_spool_weight", "spool_weight")):
+        value = _num(filament.get(field))
+        if value:
+            preset[key] = [_fmt(value)]
+    price, weight = _num(filament.get("price")), _num(filament.get("weight"))
+    if price and weight:
+        preset["filament_cost"] = [_fmt(round(price / weight * 1000, 2))]
+    return preset
+
+
+def stocked_filaments(spools: list[dict]) -> list[dict]:
+    """Each filament that has at least one spool not archived, in Spoolman id order."""
+    seen: dict = {}
+    for spool in spools or []:
+        filament = spool.get("filament") if isinstance(spool, dict) else None
+        if spool.get("archived") or not isinstance(filament, dict) or filament.get("id") is None:
+            continue
+        seen.setdefault(filament["id"], filament)
+    return [seen[key] for key in sorted(seen, key=lambda k: str(k).zfill(12))]
+
+
+def profile_files(spools: list[dict], names: set[str]) -> tuple[dict, dict]:
+    """({file name: preset dict}, {filament id: preset name}) for every stocked filament."""
+    files: dict = {}
+    by_id: dict = {}
+    taken: set[str] = set()
+    for filament in stocked_filaments(spools):
+        name = profile_name(filament)
+        if name.lower() in taken:
+            name = f"{name} #{filament['id']}"
+        taken.add(name.lower())
+        vendor = str((filament.get("vendor") or {}).get("name") or "").strip()
+        parent = profile_parent(vendor, str(filament.get("material") or ""), names)
+        files[f"{name}.json"] = profile_preset(filament, name, parent)
+        by_id[filament["id"]] = name
+    return files, by_id
+
+
+def _orca_data_dir() -> Path | None:
+    for parent in PLUGIN_DIR.parents:
+        if parent.name == "orca_plugins":
+            return parent.parent
+    return DATA_DIR.parent if DATA_DIR.parent.name == "OrcaSlicer" else None
+
+
+def profile_user_folder(bundle) -> str:
+    """The signed-in account's preset folder, taken from where a user preset is stored."""
+    for collection in (bundle.filaments, bundle.prints, bundle.printers):
+        for index in range(collection.size()):
+            parts = Path(collection.preset(index).file or "").parts
+            if "user" in parts and parts.index("user") + 1 < len(parts):
+                return parts[parts.index("user") + 1]
+    return "default"
+
+
+def profile_snapshot() -> dict | None:
+    """What profile_sync needs from the preset bundle. Call it on the UI thread."""
+    try:
+        bundle = orca.host.preset_bundle()
+        return {"names": set(bundle.filaments.preset_names()), "folder": profile_user_folder(bundle)}
+    except Exception:
+        log.exception("Could not read the filament presets")
+        return None
+
+
+def _write_json(path: Path, value: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.tmp")
+    tmp.write_text(json.dumps(value, indent=2, ensure_ascii=False), encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def write_profiles(target: Path, files: dict) -> str:
+    """Make target/filament hold exactly these presets. Returns the new hash, or "" if unchanged."""
+    digest = hashlib.sha256(json.dumps(files, sort_keys=True).encode("utf-8")).hexdigest()
+    state_file = target / PROFILE_STATE
+    try:
+        if json.loads(state_file.read_text(encoding="utf-8")).get("hash") == digest:
+            return ""
+    except (OSError, ValueError, AttributeError):
+        pass
+    folder = target / "filament"
+    for name, preset in files.items():
+        _write_json(folder / name, preset)
+    for old in folder.glob("*.json"):
+        if old.name not in files:
+            old.unlink()
+    _write_json(target / "bundle_metadata.json",
+                {"id": PROFILE_BUNDLE, "name": f"{PLUGIN_NAME} (Spoolman)", "version": PLUGIN_VERSION})
+    return digest
+
+
+def profile_sync(spools: list[dict], snapshot: dict | None) -> dict:
+    """Write and hot-reload the Spoolman filament presets. Never raises."""
+    if not snapshot:
+        return dict(_profiles)
+    root = _orca_data_dir()
+    try:
+        if root is None:
+            raise RuntimeError("OrcaSlicer's data folder was not found")
+        files, by_id = profile_files(spools, snapshot["names"])
+        target = root / "user" / snapshot["folder"] / "_local" / PROFILE_BUNDLE
+        digest = write_profiles(target, files)
+        if digest:
+            orca.host.preset.bundles.reload_local(PROFILE_BUNDLE)
+            # Only after OrcaSlicer accepted the bundle, so a refused one is tried again.
+            _write_json(target / PROFILE_STATE, {"hash": digest})
+            log.info("Synced %d filament profiles from Spoolman", len(files))
+        _profiles.update(names=by_id, count=len(files), error="")
+        _report("Profile sync", None)
+    except Exception as exc:
+        _profiles["error"] = str(exc)
+        _report("Profile sync", str(exc), exc_info=True)
+    return dict(_profiles)
+
+
+def load_spools_synced(snapshot: dict | None) -> dict:
+    """The spool list, after syncing the filament profiles from it. For worker threads."""
+    result = load_spools()
+    if result.get("ok") and snapshot:
+        state = profile_sync(result["spools"], snapshot)
+        result["profiles"] = {"count": state["count"], "error": state["error"]}
+    return result
+
+
+def profile_for_spool(spool: dict | None) -> str:
+    """The preset name OrcaSlicer knows a spool's filament by, or ''."""
+    filament = (spool or {}).get("filament") or {}
+    name = _profiles["names"].get(filament.get("id"))
+    return PROFILE_PREFIX + name if name else ""
+
 
 PRINTER_SLOTS = {"ams": 4, "ht": 1, "ext": 1}
 
@@ -4906,8 +5129,10 @@ class SpoolerWindow(orca.script.ScriptPluginCapabilityBase):
         panel = self._panel
         low_stock_grams = parse_low(get_settings().get("low_stock_grams"))
 
+        snapshot = profile_snapshot() if source() == "spoolman" else None
+
         def worker():
-            result = load_spools()
+            result = load_spools_synced(snapshot)
             self._refreshing = False
             if panel.is_open():
                 panel.post({"type": "spools", "low_stock_grams": low_stock_grams,
@@ -5074,8 +5299,10 @@ if _PAGES:
             _local_sync()
             low_stock_grams = parse_low(get_settings().get("low_stock_grams"))
 
+            snapshot = profile_snapshot() if source() == "spoolman" else None
+
             def worker():
-                result = load_spools()
+                result = load_spools_synced(snapshot)
                 self._refreshing = False
                 self.post_message({"type": "spools", "low_stock_grams": low_stock_grams,
                                    "weight_display": weight_mode(), "show_cart": cart_on(),
