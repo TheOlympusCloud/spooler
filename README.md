@@ -32,7 +32,7 @@ the rest is automatic.
     printer reports, else by RFID tag, else by vendor, material and colour.
   - **Single-extruder Klipper printers (e.g. Sovol SV06 with Klipper):** the spool Moonraker's
     Spoolman integration has marked as active.
-  Each slot shows which OrcaSlicer preset matches it. Hosts that aren't Moonraker are ignored.
+  Hover a slot to see which OrcaSlicer preset matches it. Hosts that aren't Moonraker are ignored.
 - **Plugins > Run > "Spooler: Load Printer Filaments"** puts the preset for the filament each
   toolhead holds into the plate's filament slots, for the printer currently selected.
 
@@ -54,6 +54,16 @@ Link, filament usage booking and the after-slice filament check.
   tab and assign its spools by hand.
 - Filament usage on Klipper printers is best tracked by Moonraker's own
   [Spoolman integration](https://moonraker.readthedocs.io/en/latest/configuration/#spoolman).
+
+## Images
+
+<p align="center"><img src="assets/orca-cloud/spooler-store-image-presets.png" alt="Spoolman filaments in the OrcaSlicer filament dropdown" width="800"></p>
+<p align="center"><img src="assets/orca-cloud/spooler-store-image-spool-list.png" alt="Spooler spool list" width="800"></p>
+<p align="center"><img src="assets/orca-cloud/spooler-store-image-printer.png" alt="Spooler Printer tab with Snapmaker U1 toolheads" width="800"></p>
+<p align="center"><img src="assets/orca-cloud/spooler-store-image-settings.png" alt="Spooler Settings" width="800"></p>
+
+Regenerate them after interface changes with `python scripts/store_images/render.py` (needs Google
+Chrome or Chromium).
 
 ## Install
 

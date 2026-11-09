@@ -3,6 +3,17 @@
 Spooler is a fork of [Spoolio](https://github.com/danm1989/spoolio-orcaslicer); entries before
 0.9.0 are Spoolio's.
 
+## [0.9.1] - 2026-11-09
+
+### Changed
+- New Spooler brand: logo in the tab header, tab icon, banner and store images.
+- Printer slot cards name the filament only, so names fit four to a row; the matching
+  OrcaSlicer preset shows when you hover a slot.
+
+### Fixed
+- Preset names containing "conf", "cert" or "secret", which OrcaSlicer refuses to write.
+- An offline printer no longer fills the log with a line per retry.
+
 ## [0.9.0] - 2026-11-09
 
 First Spooler release: set your Spoolman address once and the rest is automatic.
