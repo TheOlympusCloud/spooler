@@ -1867,7 +1867,9 @@ def _kx_session(pid: str, link: dict, stop: threading.Event) -> None:
         for number, topic in enumerate((f"{KX_TOPIC}/printer/+/{model}/{device}/#",
                                         f"{KX_TOPIC}/printer/public/{model}/{device}/#"), 1):
             sock.sendall(_mqtt_subscribe(topic, number))
-        asked = ping = heard = 0.0
+        # monotonic() counts from boot, so "never" must be -inf, not 0.
+        asked = ping = float("-inf")
+        heard = 0.0
         _live["links"][pid] = "waiting"
         while _live_active() and not stop.is_set():
             now = time.monotonic()
