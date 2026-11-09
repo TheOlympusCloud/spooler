@@ -848,7 +848,7 @@ def parse_printers(value: object) -> list[dict]:
     seen: set[str] = set()
     printers = []
     for item in value[:8]:
-        if not isinstance(item, dict):
+        if not isinstance(item, dict) or item.get("auto"):
             continue
         units = []
         for unit in (item.get("units") if isinstance(item.get("units"), list) else [])[:8]:
@@ -874,8 +874,10 @@ def parse_printers(value: object) -> list[dict]:
 
 
 def printers_cfg() -> list[dict]:
+    """Saved printers, then the Moonraker printers found in OrcaSlicer's printer presets."""
     saved = get_settings().get("printers")
-    return parse_printers(saved.get(source())) if isinstance(saved, dict) else []
+    printers = parse_printers(saved.get(source())) if isinstance(saved, dict) else []
+    return printers + list(_auto_printers)
 
 
 def save_printers(value: object) -> None:
@@ -890,7 +892,8 @@ def save_printers(value: object) -> None:
 
 def printer_state() -> dict:
     codes = read_codes()
-    printers = [dict(p, has_code=bool(codes.get(_code_key(p["id"])))) for p in printers_cfg()]
+    printers = [dict(p, has_code=p.get("kind") == "moonraker" or bool(codes.get(_code_key(p["id"]))))
+                for p in printers_cfg()]
     live = any(p["ip"] and p["has_code"] for p in printers)
     return {"printers": printers, "live_ok": live, "usage": usage_state(), "progress": progress_settings()}
 
@@ -1040,6 +1043,8 @@ def _live_tray(slot: int, tray: dict) -> dict:
         "colour": colour,
         "remain": remain if isinstance(remain, (int, float)) and 0 <= remain <= 100 else None,
         "rfid": bool(uid.strip("0")),
+        "spool": tray.get("spool_id"),
+        "profile": tray.get("profile") or "",
     }
 
 
@@ -1097,7 +1102,8 @@ def live_snapshot() -> dict:
                               "trays": [_live_tray(i, slots.get(i, {})) for i in range(size)]})
             ext = _live_tray(0, state["ext"]) if state["ext"] else None
             printers.append({"id": dev_id, "link": state.get("link", ""), "name": state["name"], "age": round(time.time() - state["time"]),
-                             "units": units, "ext": ext, "job": _live_prog(state)})
+                             "units": units, "ext": ext, "job": _live_prog(state),
+                             "heads": bool(state.get("heads"))})
         return {"links": dict(_live["links"]), "printers": printers}
 
 
@@ -1255,6 +1261,9 @@ def _local_sync() -> bool:
     codes = read_codes()
     wanted = {}
     for printer in printers_cfg():
+        if printer.get("kind") == "moonraker":
+            wanted[printer["id"]] = {"ip": printer["ip"], "name": printer["name"], "kind": "moonraker"}
+            continue
         code = codes.get(_code_key(printer["id"]))
         if printer.get("ip") and code:
             wanted[printer["id"]] = {"ip": printer["ip"], "serial": printer["serial"], "code": code,
@@ -1272,10 +1281,12 @@ def _local_sync() -> bool:
         if entry and (entry["thread"].is_alive() or _live["links"].get(pid) == "auth"):
             continue
         stop = threading.Event()
-        thread = threading.Thread(target=_local_run, args=(pid, link, stop), daemon=True)
+        run = _moon_run if link.get("kind") == "moonraker" else _local_run
+        thread = threading.Thread(target=run, args=(pid, link, stop), daemon=True)
         _local[pid] = {"link": link, "stop": stop, "thread": thread}
         thread.start()
-    _live["keep"] = bool(wanted) and usage_mode() != "off" and source() == "spoolman"
+    bambu = any(link.get("kind") != "moonraker" for link in wanted.values())
+    _live["keep"] = bambu and usage_mode() != "off" and source() == "spoolman"
     return bool(wanted)
 
 
@@ -1285,6 +1296,158 @@ def live_poll() -> dict:
     _local_sync()
     return live_snapshot()
 
+
+# --- Moonraker printers ------------------------------------------------------------------
+# Klipper printers (Snapmaker U1, Sovol SV06 ACE, ...) found from the host address saved in
+# OrcaSlicer's printer presets, so they need no setup here. Their slots are read over plain
+# HTTP and fed into the same live state as a Bambu Live Link.
+
+MOON_POLL = 5.0  # seconds
+MOON_EXT = 254
+_auto_printers: list = []
+
+
+def moon_base(host: object) -> str:
+    """http://host[:port] from a print_host value, or '' when it isn't a usable address."""
+    text = str(host or "").strip()
+    if not text:
+        return ""
+    if "://" not in text:
+        text = "http://" + text
+    parts = urllib.parse.urlsplit(text)
+    if parts.scheme not in ("http", "https") or not re.fullmatch(r"[A-Za-z0-9.\-]+(:\d{1,5})?", parts.netloc):
+        return ""
+    return f"{parts.scheme}://{parts.netloc}"
+
+
+def _slug(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:24] or "printer"
+
+
+def printer_hosts(bundle) -> list[dict]:
+    """One entry per distinct host address set on a printer preset."""
+    found: dict = {}
+    printers = bundle.printers
+    for index in range(printers.size()):
+        preset = printers.preset(index)
+        base = moon_base(preset.config_value("print_host"))
+        if not base or base in found:
+            continue
+        name = re.sub(r"\s*\(.*?nozzle\)\s*$", "", preset.label(True) or preset.name).strip()
+        found[base] = {"id": "auto-" + _slug(urllib.parse.urlsplit(base).netloc), "name": name[:40] or "Printer",
+                       "units": [], "ip": base, "serial": "", "kind": "moonraker", "auto": True}
+    return list(found.values())
+
+
+def detect_printers() -> None:
+    """Refresh the auto-detected printers. Call it on the UI thread."""
+    try:
+        _auto_printers[:] = printer_hosts(orca.host.preset_bundle())
+    except Exception:
+        log.exception("Could not read the printer presets")
+
+
+def _moon_get(base: str, path: str) -> dict:
+    with urllib.request.urlopen(base + path, timeout=TIMEOUT) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    return data.get("result") or {} if isinstance(data, dict) else {}
+
+
+def _spool_remain(spool: dict) -> float | None:
+    filament = spool.get("filament") or {}
+    left = _grams(spool.get("remaining_weight"))
+    full = _grams(spool.get("initial_weight")) or _grams(filament.get("weight"))
+    return None if left is None or not full else max(0.0, min(100.0, left / full * 100))
+
+
+def _spool_tray(slot: int, spool: dict, **extra) -> dict:
+    filament = spool.get("filament") or {}
+    colour = profile_colour(filament)
+    return {"id": str(slot), "tray_type": str(filament.get("material") or ""),
+            "tray_color": colour + "FF", "tray_sub_brands": _spool_label(spool),
+            "remain": _spool_remain(spool), "spool_id": spool.get("id"),
+            "profile": profile_for_spool(spool), **extra}
+
+
+def _list_at(value: object, index: int) -> object:
+    return value[index] if isinstance(value, list) and index < len(value) else None
+
+
+def _card_uid(info: object) -> str:
+    uid = info.get("CARD_UID") if isinstance(info, dict) else None
+    if isinstance(uid, list):
+        uid = "".join(f"{int(b) & 255:02X}" for b in uid if isinstance(b, int))
+    return "" if str(uid or "").upper() in ("", "NONE", "0") else str(uid)
+
+
+def head_tray(index: int, config: dict, detect: dict, spools: list[dict]) -> dict:
+    """A Bambu-shaped tray for one Snapmaker U1 toolhead, matched to a Spoolman spool."""
+    if not _list_at(config.get("filament_exist"), index):
+        return {"id": str(index)}
+    kind = str(_list_at(config.get("filament_type"), index) or "").strip()
+    sub = str(_list_at(config.get("filament_sub_type"), index) or "").strip()
+    vendor = str(_list_at(config.get("filament_vendor"), index) or "").strip()
+    rgba = str(_list_at(config.get("filament_color_rgba"), index) or "")
+    uid = _card_uid(_list_at((detect or {}).get("info"), index))
+    tray = {"tag_uid": uid}
+    spool = match_spool(tray, spools) if uid else None
+    if spool is None:
+        found = match_spools({"preset": "", "vendor": vendor, "material": kind, "colour": rgba[:6]}, spools)
+        spool = found[0] if found else None
+    if spool is not None:
+        return _spool_tray(index, spool, tray_color=rgba or None, tag_uid=uid)
+    label = " ".join(part for part in (vendor, kind, "" if sub.upper() in ("", "NONE", "BASIC") else sub) if part)
+    return {"id": str(index), "tray_type": kind, "tray_color": rgba, "tray_sub_brands": label,
+            "tag_uid": uid, "remain": None, "spool_id": None, "profile": ""}
+
+
+def moon_report(status: dict, active_spool: object, spools: list[dict]) -> tuple[dict, bool]:
+    """(Bambu-shaped report, has toolheads) from Moonraker's answers."""
+    config = status.get("print_task_config")
+    if isinstance(config, dict) and isinstance(config.get("filament_exist"), list):
+        detect = status.get("filament_detect") if isinstance(status.get("filament_detect"), dict) else {}
+        heads = len(config["filament_exist"])
+        trays = [head_tray(i, config, detect, spools) for i in range(heads)]
+        return {"print": {"ams": {"ams": [{"id": "0", "tray": trays}]}}}, True
+    spool = next((s for s in spools if str(s.get("id")) == str(active_spool)), None) if active_spool else None
+    ext = _spool_tray(MOON_EXT, spool) if spool else {"id": str(MOON_EXT)}
+    return {"print": {"vt_tray": ext}}, False
+
+
+def moon_poll(base: str) -> tuple[dict, bool]:
+    status = _moon_get(base, "/printer/objects/query?print_task_config&filament_detect").get("status") or {}
+    active = None
+    if "print_task_config" not in status:
+        try:
+            active = _moon_get(base, "/server/spoolman/spool_id").get("spool_id")
+        except urllib.error.HTTPError:
+            active = None  # Moonraker without its Spoolman integration
+    return moon_report(status, active, _spool_cache["spools"] or [])
+
+
+def _moon_run(pid: str, link: dict, stop: threading.Event) -> None:
+    fails = 0
+    while _live_active() and not stop.is_set():
+        try:
+            doc, heads = moon_poll(link["ip"])
+            if heads:
+                # A toolhead printer reports every head each time, so drop what it no longer has.
+                with _live_lock:
+                    state = _live["printers"].get(pid)
+                    if state is not None:
+                        state["units"].clear()
+            live_apply(pid, link["name"], doc, link=pid)
+            with _live_lock:
+                _live["printers"][pid]["heads"] = heads
+            _live["links"][pid] = "live"
+            fails = 0
+            _report(f"Printer {link['name']}", None)
+        except Exception as exc:
+            fails += 1
+            _live["links"][pid] = "unreachable"
+            _report(f"Printer {link['name']}", str(exc))
+        stop.wait(MOON_POLL if not fails else LIVE_RETRY[min(fails - 1, len(LIVE_RETRY) - 1)])
+    _live["links"].pop(pid, None)
 
 
 USAGE_FILE = DATA_DIR / "usage.json"
@@ -3120,7 +3283,8 @@ MAIN_PAGE = """
       if (t.empty) return plainCard("Empty", "Nothing loaded", "", "ams-empty");
       const color = t.colour ? "#" + t.colour : "#888";
       const pct = t.remain === null ? null : Math.round(t.remain);
-      const sub = [t.type, t.colour ? "#" + t.colour : ""].filter(Boolean).join(" \u00b7 ");
+      const profile = (t.profile || "").split("/").pop();
+      const sub = [t.type, t.colour ? "#" + t.colour : "", profile ? "Orca: " + profile : ""].filter(Boolean).join(" \u00b7 ");
       const rfid = t.rfid ? '<div class="spool-rfid" title="RFID spool"><span>RFID</span></div>' : "";
       return '<div class="spool-card"><div class="spool-body">' +
         '<div class="spool-swatch-col"><div class="spool-swatch" style="background:' + color + '"></div>' + rfid + '</div>' +
@@ -3151,6 +3315,10 @@ MAIN_PAGE = """
           return '<div class="ams-cell' + (on ? " active" : "") + '"><div class="ams-n">' + (ext ? "E" : i + 1) + '</div>' + liveCard(t) + '</div>';
         }).join("") + '</div>';
       };
+      if (lv.heads) {
+        return lv.units.map(function (u) { return unitHtml("Toolheads", u.trays, false, u.id); }).join("") ||
+          '<div class="pnote">Waiting for the printer to report its toolheads...</div>';
+      }
       let units = lv.units.map(function (u) {
         if (u.kind === "ht") return unitHtml("AMS HT", u.trays, false, u.id);
         ams += 1;
@@ -3242,7 +3410,20 @@ MAIN_PAGE = """
         '<div class="pnote">Spools already in a slot are not listed.</div></div>';
     }
 
+    function autoPanel(p) {
+      const lvl = liveByLink(p.id);
+      const st = (liveData.links || {})[p.id];
+      const live = !!lvl && st === "live";
+      const sub = live ? linkStatus(p) : st === "unreachable"
+        ? "Can't reach " + esc(p.ip) + " - is the printer on?" : "Connecting to " + esc(p.ip) + "...";
+      return '<div class="ams"><div class="ams-h"><span class="pname">' + esc(p.name) + '</span><span class="sub">' + sub + '</span></div>' +
+        '<div class="ams-body">' + (live ? liveUnits(lvl) : "") +
+        '<div class="ams-note">Found in your OrcaSlicer printer presets. Each Spoolman filament is listed under ' +
+        'User presets in the sidebar&#39;s filament dropdown, already in its colour.</div></div></div>';
+    }
+
     function manualPanel(p, byId) {
+      if (p.auto) return autoPanel(p);
       let total = 0;
       let used = 0;
       const units = p.units.map(function (u, ui) {
@@ -5125,6 +5306,7 @@ class SpoolerWindow(orca.script.ScriptPluginCapabilityBase):
         if self._refreshing:
             return
         self._refreshing = True
+        detect_printers()
         _local_sync()
         panel = self._panel
         low_stock_grams = parse_low(get_settings().get("low_stock_grams"))
@@ -5296,6 +5478,7 @@ if _PAGES:
             if self._refreshing:
                 return
             self._refreshing = True
+            detect_printers()
             _local_sync()
             low_stock_grams = parse_low(get_settings().get("low_stock_grams"))
 
@@ -5483,6 +5666,62 @@ if _SLICING:
             return orca.ExecutionResult.success()
 
 
+def printer_trays(base: str) -> list[dict]:
+    """The selected printer's slots in slicer order, each with its matched profile."""
+    result = get_spools(get_settings().get("spoolman_url", ""))
+    if not result["ok"]:
+        raise RuntimeError(result["error"])
+    _profiles["names"].update(profile_files(result["spools"], set())[1])
+    doc, heads = moon_poll(base)
+    report = doc["print"]
+    return report["ams"]["ams"][0]["tray"] if heads else [report["vt_tray"]]
+
+
+def slot_plan(trays: list[dict], slots: int, names: set[str]) -> tuple[list, list]:
+    """([(slot, preset name)], [slots with no profile]) for the plate's filament slots."""
+    plan, missing = [], []
+    for slot, tray in enumerate(trays[:slots], 1):
+        name = tray.get("profile") or ""
+        short = name[len(PROFILE_PREFIX):] if name.startswith(PROFILE_PREFIX) else name
+        found = next((n for n in (name, short) if n and n in names), "")
+        if found:
+            plan.append((slot, found))
+        elif tray.get("tray_type"):
+            missing.append(slot)
+    return plan, missing
+
+
+class SpoolerLoadFilaments(orca.script.ScriptPluginCapabilityBase):
+    """Plugins > Run: put the filament each printer slot holds into the plate's filament slots."""
+
+    def get_name(self):
+        return f"{PLUGIN_NAME}: Load Printer Filaments"
+
+    def execute(self):
+        try:
+            bundle = orca.host.preset_bundle()
+            base = moon_base(bundle.full_config_value("print_host"))
+            slots = len(bundle.current_filament_preset_names())
+            names = set(bundle.filaments.preset_names())
+            if not base:
+                raise RuntimeError("The selected printer preset has no host address.")
+            plan, missing = slot_plan(printer_trays(base), slots, names)
+            for slot, name in plan:
+                tx = orca.host.preset.filament.begin_update(slot, name)
+                try:
+                    tx.commit()
+                except Exception:
+                    log.info("Nothing to commit for slot %d", slot)
+            text = f"Loaded {len(plan)} filament slot(s) from the printer."
+            if missing:
+                text += " No Spoolman filament matched slot(s) " + ", ".join(map(str, missing)) + "."
+            log.info(text)
+            return orca.ExecutionResult.success(text)
+        except Exception as exc:
+            log.exception("Load printer filaments failed")
+            return orca.ExecutionResult.failure(orca.PluginResult.RecoverableError, str(exc))
+
+
 @orca.plugin
 class SpoolerPlugin(orca.base):
     def register_capabilities(self):
@@ -5492,3 +5731,4 @@ class SpoolerPlugin(orca.base):
             orca.register_capability(SpoolerWindow)
         if _SLICING:
             orca.register_capability(SpoolerFilamentCheck)
+        orca.register_capability(SpoolerLoadFilaments)

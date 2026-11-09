@@ -29,6 +29,8 @@ jobs:
         run: python scripts/check_version.py
       - name: Build the per-OS plugin files
         run: python scripts/build.py
+      - name: Unit tests
+        run: python -m unittest discover -s tests
 
   lint:
     name: Lint
@@ -39,4 +41,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install ruff
-      - run: ruff check plugin scripts
+      - run: ruff check plugin scripts tests
