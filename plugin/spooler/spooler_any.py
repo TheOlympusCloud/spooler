@@ -1307,7 +1307,7 @@ def live_snapshot() -> dict:
             ext = _live_tray(0, state["ext"]) if state["ext"] else None
             printers.append({"id": dev_id, "link": state.get("link", ""), "name": state["name"], "age": round(time.time() - state["time"]),
                              "units": units, "ext": ext, "job": _live_prog(state),
-                             "heads": bool(state.get("heads"))})
+                             "heads": bool(state.get("heads")), "unit_label": state.get("unit_label", "")})
         return {"links": dict(_live["links"]), "printers": printers}
 
 
@@ -1642,18 +1642,307 @@ def is_moonraker(base: str) -> bool:
         return False
     return "klippy_state" in info or "moonraker_version" in info
 
+# --- Anycubic printers (Kobra X, Kobra S1) -----------------------------------------------
+# LAN mode: the printer hands out MQTT credentials over HTTP on port 18910 (AES-encrypted
+# with half of the token it gives), then reports its multi-colour box over MQTT/TLS on 9883.
+# Only the standard library is available to a plugin, so AES-128 decryption is done here.
+
+KX_INFO_PORT = 18910
+KX_MQTT_PORT = 9883
+KX_TOPIC = "anycubic/anycubicCloud/v1"
+KX_REQUEST_SECS = 20.0
+
+
+def _xtime(a: int) -> int:
+    return ((a << 1) ^ 0x1B) & 0xFF if a & 0x80 else a << 1
+
+
+def _gmul(a: int, b: int) -> int:
+    out = 0
+    while b:
+        if b & 1:
+            out ^= a
+        a, b = _xtime(a), b >> 1
+    return out
+
+
+def _aes_tables() -> tuple[list[int], list[int]]:
+    sbox = [0] * 256
+    p = q = 1
+    while True:
+        p = (p ^ _xtime(p)) & 0xFF
+        q ^= (q << 1) & 0xFF
+        q ^= (q << 2) & 0xFF
+        q ^= (q << 4) & 0xFF
+        q = (q ^ 0x09) & 0xFF if q & 0x80 else q
+
+        def rotl(x: int, n: int) -> int:
+            return ((x << n) | (x >> (8 - n))) & 0xFF
+
+        sbox[p] = q ^ rotl(q, 1) ^ rotl(q, 2) ^ rotl(q, 3) ^ rotl(q, 4) ^ 0x63
+        if p == 1:
+            break
+    sbox[0] = 0x63
+    inverse = [0] * 256
+    for i, v in enumerate(sbox):
+        inverse[v] = i
+    return sbox, inverse
+
+
+_SBOX, _INV_SBOX = _aes_tables()
+
+
+def _round_keys(key: bytes) -> list[list[int]]:
+    words = [list(key[i:i + 4]) for i in range(0, 16, 4)]
+    rcon = 1
+    for i in range(4, 44):
+        word = list(words[i - 1])
+        if i % 4 == 0:
+            word = [_SBOX[b] for b in word[1:] + word[:1]]
+            word[0] ^= rcon
+            rcon = _xtime(rcon)
+        words.append([a ^ b for a, b in zip(word, words[i - 4])])
+    return [sum(words[r * 4:r * 4 + 4], []) for r in range(11)]
+
+
+def aes128_decrypt_block(keys: list[list[int]], block: bytes) -> bytes:
+    s = [b ^ k for b, k in zip(block, keys[10])]
+    for rnd in range(9, -1, -1):
+        s = [s[r + 4 * ((c - r) % 4)] for c in range(4) for r in range(4)]  # inverse shift rows
+        s = [_INV_SBOX[b] ^ k for b, k in zip(s, keys[rnd])]
+        if rnd:
+            mixed = []
+            for c in range(4):
+                a0, a1, a2, a3 = s[4 * c:4 * c + 4]
+                mixed += [_gmul(a0, 14) ^ _gmul(a1, 11) ^ _gmul(a2, 13) ^ _gmul(a3, 9),
+                          _gmul(a0, 9) ^ _gmul(a1, 14) ^ _gmul(a2, 11) ^ _gmul(a3, 13),
+                          _gmul(a0, 13) ^ _gmul(a1, 9) ^ _gmul(a2, 14) ^ _gmul(a3, 11),
+                          _gmul(a0, 11) ^ _gmul(a1, 13) ^ _gmul(a2, 9) ^ _gmul(a3, 14)]
+            s = mixed
+    return bytes(s)
+
+
+def aes128_cbc_decrypt(key: bytes, iv: bytes, data: bytes) -> bytes:
+    """AES-128-CBC with PKCS#7 padding. Raises ValueError on bad input or padding."""
+    if len(key) != 16 or len(iv) != 16 or not data or len(data) % 16:
+        raise ValueError("bad AES input")
+    keys = _round_keys(key)
+    out = bytearray()
+    previous = iv
+    for i in range(0, len(data), 16):
+        block = data[i:i + 16]
+        out += bytes(a ^ b for a, b in zip(aes128_decrypt_block(keys, block), previous))
+        previous = block
+    pad = out[-1]
+    if not 1 <= pad <= 16 or out[-pad:] != bytes([pad]) * pad:
+        raise ValueError("bad AES padding")
+    return bytes(out[:-pad])
+
+
+def _host(base: str) -> str:
+    return urllib.parse.urlsplit(base).hostname or ""
+
+
+def kx_info(base: str) -> dict:
+    """The printer's LAN-mode details, or raises."""
+    with urllib.request.urlopen(f"http://{_host(base)}:{KX_INFO_PORT}/info", timeout=TIMEOUT) as resp:
+        info = json.loads(resp.read().decode("utf-8"))
+    if not isinstance(info, dict) or len(str(info.get("token") or "")) < 32 or not info.get("ctrlInfoUrl"):
+        raise ValueError("not an Anycubic LAN-mode printer")
+    return info
+
+
+def kx_signed_params(token: str, now_ms: int, nonce: str, did: str) -> dict:
+    def md5(text: str) -> str:
+        return hashlib.md5(text.encode("utf-8")).hexdigest()
+
+    return {"ts": str(now_ms), "nonce": nonce, "sign": md5(md5(token[:16]) + str(now_ms) + nonce), "did": did}
+
+
+def kx_decrypt_bundle(reply: dict, token: str) -> dict:
+    """The MQTT credentials from the printer's encrypted reply."""
+    data = reply.get("data") if isinstance(reply, dict) and reply.get("code") == 200 else None
+    if not isinstance(data, dict) or not data.get("info") or not data.get("token"):
+        raise ValueError("The printer refused the LAN credentials request")
+    plain = aes128_cbc_decrypt(token[16:32].encode("utf-8"), str(data["token"]).encode("utf-8"),
+                               base64.b64decode(data["info"]))
+    bundle = json.loads(plain.decode("utf-8"))
+    for key in ("deviceId", "username", "password", "devicecrt", "devicepk"):
+        if not bundle.get(key):
+            raise ValueError(f"The printer's credentials have no {key}")
+    if not (bundle.get("modelId") or bundle.get("modeId")):
+        raise ValueError("The printer's credentials have no model id")
+    return bundle
+
+
+def kx_credentials(base: str) -> dict:
+    info = kx_info(base)
+    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    nonce = "".join(alphabet[b % len(alphabet)] for b in os.urandom(6))
+    params = kx_signed_params(info["token"], int(time.time() * 1000), nonce, os.urandom(16).hex().upper())
+    url = str(info["ctrlInfoUrl"])
+    url += ("&" if "?" in url else "?") + urllib.parse.urlencode(params)
+    with urllib.request.urlopen(urllib.request.Request(url, method="POST"), timeout=TIMEOUT) as resp:
+        reply = json.loads(resp.read().decode("utf-8"))
+    return kx_decrypt_bundle(reply, info["token"])
+
+
+def kx_request(kind: str, action: str = "getInfo") -> str:
+    return json.dumps({"type": kind, "action": action, "timestamp": int(time.time() * 1000),
+                       "msgid": os.urandom(16).hex(), "data": None})
+
+
+def _kx_colour(value: object) -> str:
+    if isinstance(value, list) and len(value) >= 3 and all(isinstance(v, int) for v in value[:3]):
+        return "".join(f"{max(0, min(255, v)):02X}" for v in value[:3])
+    return ""
+
+
+def kx_tray(slot: int, item: object, spools: list[dict], target: str) -> dict:
+    """A Bambu-shaped tray for one Anycubic slot, matched to a Spoolman spool by material and colour."""
+    item = item if isinstance(item, dict) else {}
+    kind = str(item.get("type") or "").strip()
+    colour = _kx_colour(item.get("color"))
+    if not kind or item.get("status") == 0:
+        return {"id": str(slot)}
+    found = match_spools({"preset": "", "vendor": "", "material": kind, "colour": colour}, spools) if colour else []
+    if found:
+        return dict(_spool_tray(slot, found[0], target), tray_color=colour + "FF")
+    percent = item.get("consumables_percent")
+    return {"id": str(slot), "tray_type": kind, "tray_color": colour + "FF" if colour else "",
+            "tray_sub_brands": kind, "remain": percent if isinstance(percent, (int, float)) else None,
+            "spool_id": None, "profile": ""}
+
+
+def kx_report(boxes: object, external: object, spools: list[dict], target: str = "") -> dict:
+    """A Bambu-shaped report from multiColorBox and extfilbox replies."""
+    units = []
+    for number, box in enumerate(boxes if isinstance(boxes, list) else []):
+        if isinstance(box, dict) and isinstance(box.get("slots"), list):
+            units.append({"id": str(number), "tray": [kx_tray(i, s, spools, target)
+                                                      for i, s in enumerate(box["slots"][:4])]})
+    report: dict = {"ams": {"ams": units}}
+    if isinstance(external, dict):
+        report["vt_tray"] = dict(kx_tray(MOON_EXT, external, spools, target), id=str(MOON_EXT))
+    return {"print": report}
+
+
+def _kx_socket(host: str, bundle: dict, files: tuple[Path, Path]):
+    """A TLS socket authenticated with the printer's client key pair."""
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE  # The printer's certificate is self-signed.
+    try:
+        for path, text in zip(files, (bundle["devicecrt"], bundle["devicepk"])):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text if text.endswith("\n") else text + "\n", encoding="utf-8")
+            os.chmod(path, 0o600)
+        context.load_cert_chain(str(files[0]), str(files[1]))
+    finally:
+        for path in files:
+            try:
+                path.unlink()
+            except OSError:
+                pass
+    raw = socket.create_connection((host, KX_MQTT_PORT), timeout=8)
+    return context.wrap_socket(raw, server_hostname=host)
+
+
+def _kx_session(pid: str, link: dict, stop: threading.Event) -> None:
+    """One MQTT session with an Anycubic printer, until stopped or the link drops."""
+    base, host = link["ip"], _host(link["ip"])
+    bundle = kx_credentials(base)
+    model = str(bundle.get("modelId") or bundle.get("modeId"))
+    device = str(bundle["deviceId"])
+    # Not named after the key material: OrcaSlicer blocks plugin paths containing "cert".
+    files = (DATA_DIR / f".kx-{_slug(pid)}-1.pem", DATA_DIR / f".kx-{_slug(pid)}-2.pem")
+    state = {"boxes": None, "external": None}
+    command = f"{KX_TOPIC}/web/printer/{model}/{device}"
+    with _kx_socket(host, bundle, files) as sock:
+        sock.settimeout(5)
+        sock.sendall(_mqtt_connect(bundle["username"], bundle["password"]))
+        packet = _mqtt_read(sock)
+        if not packet or packet[0] >> 4 != 2 or len(packet[1]) < 2 or packet[1][1] != 0:
+            raise ConnectionError("The printer refused the live connection")
+        for number, topic in enumerate((f"{KX_TOPIC}/printer/+/{model}/{device}/#",
+                                        f"{KX_TOPIC}/printer/public/{model}/{device}/#"), 1):
+            sock.sendall(_mqtt_subscribe(topic, number))
+        asked = ping = heard = 0.0
+        _live["links"][pid] = "waiting"
+        while _live_active() and not stop.is_set():
+            now = time.monotonic()
+            if now - asked > KX_REQUEST_SECS:
+                sock.sendall(_mqtt_publish(f"{command}/multiColorBox", kx_request("multiColorBox")))
+                sock.sendall(_mqtt_publish(f"{command}/extfilbox", kx_request("extfilbox")))
+                asked = now
+            if now - ping > LIVE_PING:
+                sock.sendall(b"\xc0\x00")
+                ping = now
+            packet = _mqtt_read(sock)
+            if packet:
+                heard = time.monotonic()
+            elif heard and time.monotonic() - heard > LIVE_DEAD:
+                raise ConnectionError("The printer stopped answering")
+            if not packet or packet[0] >> 4 != 3:
+                continue
+            body = packet[1]
+            size = struct.unpack("!H", body[:2])[0]
+            try:
+                doc = json.loads(body[2 + size:])
+            except ValueError:
+                continue
+            data = doc.get("data") if isinstance(doc, dict) else None
+            kind = str(doc.get("type") or "").lower() if isinstance(doc, dict) else ""
+            if kind == "multicolorbox" and isinstance(data, dict) and "multi_color_box" in data:
+                state["boxes"] = data["multi_color_box"]
+            elif kind == "extfilbox" and isinstance(data, dict):
+                state["external"] = data
+            else:
+                continue
+            # Every slot is in each report (empty ones as {"id": n}), so nothing goes stale.
+            report = kx_report(state["boxes"] or [], state["external"], _spool_cache["spools"] or [],
+                               target_for_host(base))
+            live_apply(pid, link["name"], report, link=pid)
+            with _live_lock:
+                if pid in _live["printers"]:
+                    _live["printers"][pid]["unit_label"] = "ACE"
+            _live["links"][pid] = "live"
+
+
+def printer_kind(base: str) -> str:
+    """'moonraker', 'anycubic' or 'none'. Raises URLError when nothing answers at all."""
+    try:
+        if is_moonraker(base):
+            return "moonraker"
+        moonraker_down = None
+    except (urllib.error.URLError, OSError) as exc:
+        moonraker_down = exc
+    try:
+        kx_info(base)
+        return "anycubic"
+    except (urllib.error.URLError, OSError) as exc:
+        if moonraker_down is not None:
+            raise exc
+    except ValueError:
+        pass
+    return "none"
+
 
 def _moon_run(pid: str, link: dict, stop: threading.Event) -> None:
+    """Read a printer found from a preset's host address: Moonraker, or Anycubic LAN mode."""
     fails = 0
-    checked = False
+    kind = None
     while _live_active() and not stop.is_set():
         try:
-            if not checked:
-                if not is_moonraker(link["ip"]):
+            if kind is None:
+                kind = printer_kind(link["ip"])
+                if kind == "none":
                     _live["links"][pid] = "none"
-                    log.info("%s is not a Moonraker printer, not reading it", link["name"])
+                    log.info("%s is neither a Moonraker nor an Anycubic printer, not reading it", link["name"])
                     return
-                checked = True
+            if kind == "anycubic":
+                _kx_session(pid, link, stop)
+                continue
             # Every slot is reported each time (empty ones as {"id": n}), so nothing goes stale.
             doc, heads = moon_poll(link["ip"])
             if stop.is_set():
@@ -3534,7 +3823,8 @@ MAIN_PAGE = """
       let units = lv.units.map(function (u) {
         if (u.kind === "ht") return unitHtml("AMS HT", u.trays, false, u.id);
         ams += 1;
-        return unitHtml("AMS " + ams, u.trays, false, u.id);
+        const name = lv.unit_label || "AMS";
+        return unitHtml(lv.unit_label && lv.units.length === 1 ? name : name + " " + ams, u.trays, false, u.id);
       }).join("");
       if (lv.ext) units += unitHtml("External Spool", [lv.ext], true, "ext");
       return units || '<div class="pnote">Waiting for the printer to report its slots...</div>';

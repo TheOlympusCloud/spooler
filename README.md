@@ -32,6 +32,9 @@ the rest is automatic.
     printer reports, else by RFID tag, else by vendor, material and colour.
   - **Single-extruder Klipper printers (e.g. Sovol SV06 with Klipper):** the spool Moonraker's
     Spoolman integration has marked as active.
+  - **Anycubic Kobra X (and other Anycubic printers in LAN mode):** each slot of the multi-colour
+    box (ACE) and the external spool, matched to your Spoolman spools by material and colour.
+    Turn on LAN mode on the printer and put its IP address in the printer preset's host field.
   Hover a slot to see which OrcaSlicer preset matches it. Hosts that aren't Moonraker are ignored.
 - **Plugins > Run > "Spooler: Load Printer Filaments"** puts the preset for the filament each
   toolhead holds into the plate's filament slots, for the printer currently selected.
@@ -50,8 +53,6 @@ Link, filament usage booking and the after-slice filament check.
   slot's dropdown sets the colour.
 - Generated presets are owned by Spooler and are rewritten from Spoolman, so edit the filament in
   Spoolman (or save a copy of the preset under a new name) rather than editing them in OrcaSlicer.
-- Anycubic Kobra X live slots are planned. Until then, add it as a manual printer in the Printer
-  tab and assign its spools by hand.
 - Filament usage on Klipper printers is best tracked by Moonraker's own
   [Spoolman integration](https://moonraker.readthedocs.io/en/latest/configuration/#spoolman).
 
