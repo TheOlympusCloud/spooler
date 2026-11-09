@@ -166,4 +166,4 @@ python scripts/build.py                # per-OS plugin files in dist/
 
 ## License
 
-GNU General Public License v3.0, as the original - see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
