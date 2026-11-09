@@ -6,7 +6,7 @@ __pycache__/
 dist/
 
 # User settings and logs written by a locally installed plugin
-spoolio_settings.json
+spooler_settings.json
 *.log
 
 # Editors / OS
