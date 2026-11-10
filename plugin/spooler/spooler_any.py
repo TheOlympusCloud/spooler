@@ -656,8 +656,11 @@ ORCA_SETTINGS_KEYS = frozenset({
     "filament_deretraction_speed", "filament_z_hop", "filament_ironing_flow",
     "filament_ironing_speed", "filament_ironing_spacing", "filament_ironing_inset",
     "fan_min_speed", "fan_max_speed", "slow_down_layer_time", "slow_down_min_speed",
-    "filament_shrink", "temperature_vitrification",
+    "filament_shrink", "temperature_vitrification", "filament_density", "filament_diameter",
+    "filament_cost", "filament_shrinkage_compensation_z", "filament_notes",
 })
+# The one listed setting OrcaSlicer holds as text; every other is a number, a percentage or on/off.
+TEXT_KEYS = frozenset({"filament_notes"})
 PROFILE_RETRY = 300  # seconds before a refused set of presets is offered again
 _profiles: dict = {"names": {}, "error": "", "count": 0, "failed": ("", 0.0)}
 _profile_lock = threading.Lock()
@@ -815,27 +818,50 @@ def profile_preset(filament: dict, name: str, parent: str, target: str) -> dict:
     return preset
 
 
-def orca_settings(filament: dict, target: str) -> dict:
-    """The allowed keys of the filament's orca_settings extra field that apply to one printer,
-    as preset values. A field that isn't a JSON object is ignored."""
+def orca_settings_data(filament: dict) -> dict | None:
+    """The filament's orca_settings field as {section: settings}, a flat object being the "*"
+    section; {} when the field is empty, None when it isn't a JSON object."""
     raw = (filament.get("extra") or {}).get(ORCA_SETTINGS_FIELD)
     try:
         data = json.loads(raw) if isinstance(raw, str) else raw
         data = json.loads(data) if isinstance(data, str) else data  # Spoolman stores text as JSON
     except ValueError:
+        return None
+    if data in (None, ""):
         return {}
     if not isinstance(data, dict):
+        return None
+    return data if any(isinstance(v, dict) for v in data.values()) else {"*": data}
+
+
+def _number(text: str) -> float | None:
+    try:
+        return float(text.rstrip("%"))
+    except ValueError:
+        return None
+
+
+def _one_value(key: str, value: object) -> bool:
+    """A value OrcaSlicer can take for the setting: text holding one number, percentage or "nil"
+    for a number setting, since "0,95" would reach it as the two values 0 and 95."""
+    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+        return False
+    return key in TEXT_KEYS or not isinstance(value, str) or value == "nil" or _number(value) is not None
+
+
+def orca_settings(filament: dict, target: str) -> dict:
+    """The allowed keys of the filament's orca_settings extra field that apply to one printer,
+    as preset values. A field that isn't a JSON object is ignored."""
+    data = orca_settings_data(filament)
+    if not data:
         return {}
-    if not any(isinstance(v, dict) for v in data.values()):
-        data = {"*": data}
     low = target.lower()
     sections = [data.get("*")] + [v for k, v in data.items() if k != "*" and k.lower() in low]
     out = {}
     for section in sections:
         for key, value in (section.items() if isinstance(section, dict) else ()):
             values = value if isinstance(value, list) else [value]
-            if key in ORCA_SETTINGS_KEYS and values and all(
-                    isinstance(v, (str, int, float)) and not isinstance(v, bool) for v in values):
+            if key in ORCA_SETTINGS_KEYS and values and all(_one_value(key, v) for v in values):
                 out[key] = [v if isinstance(v, str) else _fmt(v) for v in values]
     return out
 
@@ -1089,6 +1115,135 @@ def profile_for_spool(spool: dict | None, target: str) -> str:
     filament = (spool or {}).get("filament") or {}
     name = _profiles["names"].get((filament.get("id"), target))
     return PROFILE_PREFIX + name if name else ""
+
+# --- Sending preset edits to Spoolman ----------------------------------------------------
+# OrcaSlicer won't save over a plugin's preset (Save makes a separate user copy that stops
+# following Spoolman), so edits made in its filament settings are sent from the Spooler tab
+# instead: each changed setting goes into the filament's orca_settings field, in the section for
+# the preset's printer, then the presets are rebuilt. The reload keeps the unsaved edits, which
+# now match the preset, so none are left.
+
+
+def spoolman_call(method: str, path: str, body: object = None) -> object:
+    """One Spoolman API request with a JSON body and answer; raises urllib's errors."""
+    url = f"{clean_url(get_settings().get('spoolman_url'))}/api/v1/{path}"
+    data = None if body is None else json.dumps(body).encode("utf-8")
+    request = urllib.request.Request(url, data=data, method=method, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(request, timeout=TIMEOUT) as resp:
+        return json.loads(resp.read().decode("utf-8") or "null")
+
+
+def orca_items(text: str, key: str) -> list[str]:
+    """A setting's values as config_value() writes them: numbers comma separated, text semicolon
+    separated and, when it holds spaces or special characters, quoted with C escapes."""
+    if key not in TEXT_KEYS:
+        return [item.strip() for item in text.split(",")]
+    items = []
+    for quoted, plain in re.findall(r'"((?:[^"\\]|\\.)*)"|([^;]+)', text):
+        unescape = {"n": "\n", "r": "\r"}
+        items.append(re.sub(r"\\(.)", lambda m: unescape.get(m.group(1), m.group(1)), quoted)
+                     if quoted or not plain else plain.strip())
+    return items or [""]
+
+
+def _same(first: list[str], second: list[str]) -> bool:
+    """The same values, as text or as numbers ("99.5" and "99.5%"); one value stands for every
+    nozzle variant, as in the presets."""
+    if len(first) == 1:
+        first = first * len(second)
+    if len(second) == 1:
+        second = second * len(first)
+    return len(first) == len(second) and all(
+        a == b or (_number(a) is not None and _number(a) == _number(b)) for a, b in zip(first, second))
+
+
+def edited_changes() -> tuple[str, dict]:
+    """(preset name, {setting: (edited text, saved text)}) for the Spooler preset open in
+    OrcaSlicer's filament settings. Call it on the UI thread; raises RuntimeError saying what to do."""
+    filaments = orca.host.preset_bundle().filaments
+    edited = filaments.get_edited_preset()
+    saved = filaments.find_preset(edited.name)
+    if saved is None or not edited.name.startswith(PROFILE_PREFIX):
+        raise RuntimeError("Open a Spooler preset in OrcaSlicer's filament settings and change it first.")
+    name = edited.name[len(PROFILE_PREFIX):]
+    changes = {key: (edited.config_value(key), saved.config_value(key)) for key in edited.config_keys()
+               if edited.config_value(key) != saved.config_value(key)}
+    if not changes:
+        raise RuntimeError(f"{name} has no unsaved changes to send.")
+    return name, changes
+
+
+def send_changes(name: str, changes: dict, snapshot: dict) -> str:
+    """Write a Spooler preset's changed settings into its filament's orca_settings field, in the
+    section for the preset's printer, and rebuild the presets. Returns what happened, for the user.
+    Runs on a worker thread."""
+    fid, target = next((key for key, known in _profiles["names"].items() if known == name), (None, ""))
+    if fid is None:
+        raise RuntimeError(f"{name} is no longer a Spooler preset. Refresh, then send it again.")
+    filament = spoolman_call("GET", f"filament/{int(fid)}")
+    data = orca_settings_data(filament)
+    if data is None:  # Never overwrite what can't be read back.
+        raise RuntimeError(f"The {ORCA_SETTINGS_FIELD} field of {name}'s filament isn't a JSON object; "
+                           "fix it in Spoolman, then send again.")
+    # What Spoolman gives this printer now; a setting that differs from what the preset was made
+    # from was changed in Spoolman meanwhile, and Spoolman's value is kept.
+    now = profile_preset(filament, name, "", target)
+    section, sent, kept, other = {}, [], [], []
+    for key, (text, saved) in sorted(changes.items()):
+        if key not in ORCA_SETTINGS_KEYS:
+            other.append(key)
+        elif key in now and not _same(now[key], orca_items(saved or "", key)):
+            kept.append(key)
+        else:
+            items = orca_items(text, key)
+            section[key] = items[0] if len(items) == 1 else items
+            sent.append(key)
+    if section:
+        if ORCA_SETTINGS_FIELD not in {field["key"] for field in spoolman_call("GET", "field/filament")}:
+            spoolman_call("POST", f"field/filament/{ORCA_SETTINGS_FIELD}",
+                          {"name": "Orca settings", "field_type": "text"})
+        # Last, so it beats any other section that matches the printer.
+        data[target] = {**data.pop(target, {}), **section}
+        spoolman_call("PATCH", f"filament/{int(fid)}", {"extra": {ORCA_SETTINGS_FIELD: json.dumps(json.dumps(data))}})
+    # Always, so the presets also take the values Spoolman kept. OrcaSlicer's reload keeps every
+    # unsaved edit, so a kept setting's edit stays unsaved for the user to send again or discard.
+    load_spools_synced(snapshot)
+    notes = []
+    if sent:
+        notes.append(f"Sent {', '.join(sent)} to Spoolman for {name}.")
+    if kept:
+        notes.append(f"Kept Spoolman's newer value for {', '.join(kept)}: the preset now has it, and your "
+                     "change stays unsaved; send again to use yours, or discard it.")
+    if other:
+        notes.append(f"Not sent: {', '.join(other)}. Spoolman's {ORCA_SETTINGS_FIELD} field holds only "
+                     "calibration settings; colour, vendor, material and name come from its own fields.")
+    return " ".join(notes)
+
+
+def start_send(post) -> None:
+    """Send the unsaved changes of the Spooler preset open in OrcaSlicer to Spoolman. Call it on the
+    UI thread; post() gets {"type": "sent", "ok": ..., "text": ...} when it is done."""
+    try:
+        if source() != "spoolman":
+            raise RuntimeError("Sending needs Spoolman as the source.")
+        snapshot = refresh_snapshot()
+        if snapshot is None:
+            raise RuntimeError("Could not read OrcaSlicer's presets.")
+        name, changes = edited_changes()
+    except Exception as exc:
+        log.warning("Send to Spoolman: %s", exc)
+        post({"type": "sent", "ok": False, "text": str(exc)})
+        return
+
+    def worker():
+        try:
+            text, ok = send_changes(name, changes, snapshot), True
+        except Exception as exc:
+            log.exception("Sending %s to Spoolman failed", name)
+            text, ok = _spoolman_error(exc), False
+        post({"type": "sent", "ok": ok, "text": text})
+
+    threading.Thread(target=worker, daemon=True).start()
 
 
 PRINTER_SLOTS = {"ams": 4, "ht": 1, "ext": 1}
@@ -3187,9 +3342,10 @@ MAIN_PAGE = """
     background: transparent; color: var(--orca-fg);
   }
   button:hover { border-color: var(--orca-accent); }
-  #settings-btn, #plate-recheck, #plate-dismiss, #filters-toggle {
+  #settings-btn, #plate-recheck, #plate-dismiss, #filters-toggle, #send-btn {
     padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 700;
   }
+  #send-btn { margin-left: auto; }
   #settings-btn, .sort-dir { background: var(--orca-accent); color: var(--orca-accent-fg); border-color: var(--orca-accent); }
   .filters { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
   .filters input, .filters select {
@@ -3480,6 +3636,7 @@ MAIN_PAGE = """
   <div id="page-spools">
   <div class="listbar">
     <div id="status">Loading...</div>
+    <button id="send-btn" title="Send the unsaved changes of the Spooler preset open in OrcaSlicer's filament settings to Spoolman">Send to Spoolman</button>
     <button id="filters-toggle" aria-expanded="false">Filters &#9662;</button>
   </div>
   <div id="filters-panel" hidden>
@@ -4686,6 +4843,9 @@ MAIN_PAGE = """
         setPlate(null);
       } else if (data && data.type === "usage") {
         setUsage(data.usage, true);
+      } else if (data && data.type === "sent") {
+        statusEl.textContent = data.text;
+        statusEl.className = data.ok ? "" : "error";
       } else if (data && data.type === "live") {
         const key = JSON.stringify(data.live);
         liveData = data.live;
@@ -4718,6 +4878,11 @@ MAIN_PAGE = """
 
     document.getElementById("settings-btn").addEventListener("click", function () {
       orca.postMessage({ type: "settings" });
+    });
+    document.getElementById("send-btn").addEventListener("click", function () {
+      statusEl.textContent = "Sending to Spoolman...";
+      statusEl.className = "";
+      orca.postMessage({ type: "send" });
     });
     fToggle.addEventListener("click", function () { setFilters(fPanel.hidden); });
     try { setFilters(localStorage.getItem("spooler.filters") === "1"); } catch (err) { setFilters(false); }
@@ -5891,6 +6056,8 @@ class SpoolerWindow(orca.script.ScriptPluginCapabilityBase):
             save_printer_code(data.get("id"), data.get("code"))
         elif msg_type in ("usage_mode", "usage_book", "usage_undo"):
             threading.Thread(target=lambda: self._panel.post({"type": "usage", "usage": usage_action(data)}), daemon=True).start()
+        elif msg_type == "send":
+            start_send(self._panel.post)
 
     def _push_data(self):
         if self._panel is None or not self._panel.is_open():
@@ -6060,6 +6227,8 @@ if _PAGES:
                     threading.Thread(target=recheck, daemon=True).start()
                 elif msg_type == "plate_dismiss":
                     _plate.update(payload=None, slots=[])
+                elif msg_type == "send":
+                    start_send(self.post_message)
             except Exception:
                 log.exception("on_message() raised (arg0=%r)", arg0)
 

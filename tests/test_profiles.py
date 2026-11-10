@@ -27,7 +27,8 @@ ORCA_KEYS = PLATE_KEYS | {
     "filament_retraction_length", "filament_retraction_speed", "filament_deretraction_speed",
     "filament_z_hop", "filament_ironing_flow", "filament_ironing_speed", "filament_ironing_spacing",
     "filament_ironing_inset", "fan_min_speed", "fan_max_speed", "slow_down_layer_time",
-    "slow_down_min_speed", "filament_shrink", "temperature_vitrification"}
+    "slow_down_min_speed", "filament_shrink", "temperature_vitrification", "filament_density",
+    "filament_diameter", "filament_cost", "filament_shrinkage_compensation_z", "filament_notes"}
 
 
 def spool(spool_id, filament, archived=False):
@@ -155,6 +156,20 @@ class PresetTest(unittest.TestCase):
         self.assertNotIn("filament_max_volumetric_speed", sv06)
         for p in (u1, sv06):
             self.assertEqual(set(p) - META_KEYS - CONFIG_KEYS - ORCA_KEYS, set())
+
+    def test_orca_settings_number_text_must_be_one_number(self):
+        field = {"*": {"filament_flow_ratio": "0,95", "pressure_advance": "0.032", "filament_notes": "65C,4h",
+                       "filament_retraction_length": "nil", "filament_cost": "22.99",
+                       "filament_shrinkage_compensation_z": "99.5%"}}
+        f = filament(1, "x", "PLA", price=10, weight=1000, extra={"orca_settings": json.dumps(json.dumps(field))})
+        p = sp.profile_preset(f, "x", "Generic PLA @System", U1)
+        # "0,95" would reach OrcaSlicer as the two values 0 and 95.
+        self.assertNotIn("filament_flow_ratio", p)
+        self.assertEqual(p["pressure_advance"], ["0.032"])
+        self.assertEqual(p["filament_notes"], ["65C,4h"])
+        self.assertEqual(p["filament_retraction_length"], ["nil"])
+        self.assertEqual(p["filament_cost"], ["22.99"])
+        self.assertEqual(p["filament_shrinkage_compensation_z"], ["99.5%"])
 
     def test_orca_settings_flat_and_broken(self):
         flat = filament(1, "x", "PLA", extra={"orca_settings": json.dumps('{"filament_flow_ratio": "0.98"}')})
