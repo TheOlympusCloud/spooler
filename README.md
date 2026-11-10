@@ -19,8 +19,16 @@ the rest is automatic.
     printer's own tuning is kept: Snapmaker SnapSpeed spools on the U1 get
     `Snapmaker PLA SnapSpeed @U1`, other PLA gets `Generic PLA @U1 0.4 nozzle`, silk gets the silk
     preset, and so on. The vendor's own preset wins when OrcaSlicer has one.
-  - On top of that it carries the filament's colour, vendor, nozzle and bed temperatures, density,
-    diameter and cost from Spoolman.
+  - On top of that it carries the filament's colour, vendor, nozzle and bed temperatures (the bed
+    temperature on every plate type), density, diameter and cost from Spoolman.
+  - Calibrated settings come along too: add a text extra field `orca_settings` to filaments in
+    Spoolman (Settings > Extra Fields) and put a JSON object of OrcaSlicer filament settings in it,
+    either for every printer or in sections named after part of a printer preset's name, `*` for
+    all:
+    `{"*": {"filament_flow_ratio": "0.98"}, "Snapmaker U1": {"filament_max_volumetric_speed": 20}}`.
+    Supported: flow ratio, max volumetric speed, pressure advance, retraction length and speeds,
+    Z hop, ironing flow, speed, spacing and inset, nozzle and plate temperatures, fan speeds,
+    slow-down settings, shrinkage and softening temperature. Other keys are ignored.
   - The presets follow Spoolman: new filaments appear, filaments whose spools are all archived
     disappear, and changes are picked up on each refresh (every 60 seconds while the Spooler tab
     is open).

@@ -14,11 +14,20 @@ SPOOLS = json.loads((FIXTURES / "spoolman_spools.json").read_text(encoding="utf-
 # Every key a generated preset may carry: OrcaSlicer meta keys, plus options checked to exist in
 # PrintConfig.cpp. Any other key makes OrcaSlicer refuse the whole bundle.
 META_KEYS = {"type", "name", "from", "instantiation", "inherits", "version"}
+PLATE_KEYS = {f"{p}_plate_temp{l}" for p in ("cool", "eng", "hot", "supertack", "textured_cool", "textured")
+              for l in ("", "_initial_layer")}
 CONFIG_KEYS = {"compatible_printers", "compatible_printers_condition", "filament_settings_id",
                "default_filament_colour", "filament_vendor", "nozzle_temperature",
-               "nozzle_temperature_initial_layer", "hot_plate_temp", "hot_plate_temp_initial_layer",
-               "textured_plate_temp", "textured_plate_temp_initial_layer", "filament_density",
-               "filament_diameter", "filament_cost"}
+               "nozzle_temperature_initial_layer", "filament_density",
+               "filament_diameter", "filament_cost", *PLATE_KEYS}
+# Keys the orca_settings extra field may set, all checked against OrcaSlicer 2.5.0 PrintConfig.cpp.
+ORCA_KEYS = PLATE_KEYS | {
+    "nozzle_temperature", "nozzle_temperature_initial_layer", "filament_flow_ratio",
+    "filament_max_volumetric_speed", "pressure_advance", "enable_pressure_advance",
+    "filament_retraction_length", "filament_retraction_speed", "filament_deretraction_speed",
+    "filament_z_hop", "filament_ironing_flow", "filament_ironing_speed", "filament_ironing_spacing",
+    "filament_ironing_inset", "fan_min_speed", "fan_max_speed", "slow_down_layer_time",
+    "slow_down_min_speed", "filament_shrink", "temperature_vitrification"}
 
 
 def spool(spool_id, filament, archived=False):
@@ -124,6 +133,35 @@ class PresetTest(unittest.TestCase):
         self.assertNotIn("filament_cost", p)
         self.assertEqual(p["default_filament_colour"], ["#FFFFFF"])
 
+    def test_bed_temperature_on_every_plate(self):
+        p = sp.profile_preset(filament(1, "x", "PLA", settings_bed_temp=65), "x", "Generic PLA @System", U1)
+        self.assertEqual({k: v for k, v in p.items() if k in PLATE_KEYS}, {k: ["65"] for k in PLATE_KEYS})
+
+    def test_orca_settings_field(self):
+        field = {"*": {"filament_ironing_flow": "15%", "nozzle_temperature": 230},
+                 "Snapmaker U1": {"filament_max_volumetric_speed": 20, "filament_retraction_length": "1"},
+                 "Sovol SV06": {"pressure_advance": 0.04},
+                 "sneaky": {"machine_start_gcode": "G28"}}
+        # Spoolman returns a text extra field as a JSON string of the text.
+        f = filament(1, "x", "PLA", settings_extruder_temp=205, extra={"orca_settings": json.dumps(json.dumps(field))})
+        u1 = sp.profile_preset(f, "x", "Generic PLA @System", "_local/cortexos-u1/Snapmaker U1 (0.4 nozzle) Balanced")
+        self.assertEqual(u1["filament_ironing_flow"], ["15%"])
+        self.assertEqual(u1["nozzle_temperature"], ["230"])  # the field wins over settings_extruder_temp
+        self.assertEqual(u1["filament_max_volumetric_speed"], ["20"])
+        self.assertEqual(u1["filament_retraction_length"], ["1"])
+        self.assertNotIn("pressure_advance", u1)
+        sv06 = sp.profile_preset(f, "x", "Generic PLA @System", SV06)
+        self.assertEqual(sv06["pressure_advance"], ["0.04"])
+        self.assertNotIn("filament_max_volumetric_speed", sv06)
+        for p in (u1, sv06):
+            self.assertEqual(set(p) - META_KEYS - CONFIG_KEYS - ORCA_KEYS, set())
+
+    def test_orca_settings_flat_and_broken(self):
+        flat = filament(1, "x", "PLA", extra={"orca_settings": json.dumps('{"filament_flow_ratio": "0.98"}')})
+        self.assertEqual(sp.orca_settings(flat, U1), {"filament_flow_ratio": ["0.98"]})
+        for raw in ('"not json', json.dumps("[1, 2]"), json.dumps('{"filament_flow_ratio": true}')):
+            self.assertEqual(sp.orca_settings(filament(1, "x", "PLA", extra={"orca_settings": raw}), U1), {})
+
     def test_multi_colour_uses_first(self):
         f = filament(1, "x", "PLA", colour=None, multi_color_hexes="ff0000,00ff00")
         self.assertEqual(sp.profile_colour(f), "FF0000")
@@ -133,7 +171,7 @@ class PresetTest(unittest.TestCase):
         self.assertGreater(len(files), 0)
         names = {p["name"] for p in PARENTS}
         for file_name, preset in files.items():
-            self.assertEqual(set(preset) - META_KEYS - CONFIG_KEYS, set(), file_name)
+            self.assertEqual(set(preset) - META_KEYS - CONFIG_KEYS - ORCA_KEYS, set(), file_name)
             self.assertEqual(file_name, preset["name"] + ".json")
             self.assertIn(preset["inherits"], names)
             self.assertEqual(preset["version"], "1.0.0")

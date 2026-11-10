@@ -638,8 +638,25 @@ MATERIAL_ALIASES = {
     "SILKPLA": "PLA", "PLASILK": "PLA", "MATTEPLA": "PLA", "PLAMATTE": "PLA", "PETG+": "PETG",
     "HSPETG": "PETG", "PETGHS": "PETG", "PETGHF": "PETG", "ABS+": "ABS", "NYLON": "PA",
 }
-BED_TEMP_KEYS = ("hot_plate_temp", "hot_plate_temp_initial_layer",
-                 "textured_plate_temp", "textured_plate_temp_initial_layer")
+# Every bed plate type, so the Spoolman bed temperature holds whichever plate is picked.
+BED_TEMP_KEYS = tuple(f"{plate}_plate_temp{layer}"
+                      for plate in ("cool", "eng", "hot", "supertack", "textured_cool", "textured")
+                      for layer in ("", "_initial_layer"))
+# Calibrated settings from the filament's "orca_settings" extra field in Spoolman: a JSON object
+# of OrcaSlicer filament keys, either flat (every printer) or in sections, "*" for every printer
+# plus one per printer named by a part of its preset name, e.g.
+#   {"*": {"filament_ironing_flow": "15%"}, "Snapmaker U1": {"filament_max_volumetric_speed": 20}}
+# Only these keys, checked against PrintConfig.cpp, are used; any other is ignored.
+ORCA_SETTINGS_FIELD = "orca_settings"
+ORCA_SETTINGS_KEYS = frozenset({
+    *BED_TEMP_KEYS, "nozzle_temperature", "nozzle_temperature_initial_layer",
+    "filament_flow_ratio", "filament_max_volumetric_speed", "pressure_advance",
+    "enable_pressure_advance", "filament_retraction_length", "filament_retraction_speed",
+    "filament_deretraction_speed", "filament_z_hop", "filament_ironing_flow",
+    "filament_ironing_speed", "filament_ironing_spacing", "filament_ironing_inset",
+    "fan_min_speed", "fan_max_speed", "slow_down_layer_time", "slow_down_min_speed",
+    "filament_shrink", "temperature_vitrification",
+})
 PROFILE_RETRY = 300  # seconds before a refused set of presets is offered again
 _profiles: dict = {"names": {}, "error": "", "count": 0, "failed": ("", 0.0)}
 _profile_lock = threading.Lock()
@@ -793,7 +810,33 @@ def profile_preset(filament: dict, name: str, parent: str, target: str) -> dict:
     price, weight = _num(filament.get("price")), _num(filament.get("weight"))
     if price and weight:
         preset["filament_cost"] = [_fmt(round(price / weight * 1000, 2))]
+    preset.update(orca_settings(filament, target))
     return preset
+
+
+def orca_settings(filament: dict, target: str) -> dict:
+    """The allowed keys of the filament's orca_settings extra field that apply to one printer,
+    as preset values. A field that isn't a JSON object is ignored."""
+    raw = (filament.get("extra") or {}).get(ORCA_SETTINGS_FIELD)
+    try:
+        data = json.loads(raw) if isinstance(raw, str) else raw
+        data = json.loads(data) if isinstance(data, str) else data  # Spoolman stores text as JSON
+    except ValueError:
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    if not any(isinstance(v, dict) for v in data.values()):
+        data = {"*": data}
+    low = target.lower()
+    sections = [data.get("*")] + [v for k, v in data.items() if k != "*" and k.lower() in low]
+    out = {}
+    for section in sections:
+        for key, value in (section.items() if isinstance(section, dict) else ()):
+            values = value if isinstance(value, list) else [value]
+            if key in ORCA_SETTINGS_KEYS and values and all(
+                    isinstance(v, (str, int, float)) and not isinstance(v, bool) for v in values):
+                out[key] = [v if isinstance(v, str) else _fmt(v) for v in values]
+    return out
 
 
 def stocked_filaments(spools: list[dict]) -> list[dict]:
