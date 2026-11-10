@@ -824,10 +824,10 @@ def orca_settings_data(filament: dict) -> dict | None:
     raw = (filament.get("extra") or {}).get(ORCA_SETTINGS_FIELD)
     try:
         data = json.loads(raw) if isinstance(raw, str) else raw
-        data = json.loads(data) if isinstance(data, str) else data  # Spoolman stores text as JSON
+        data = json.loads(data) if isinstance(data, str) and data.strip() else data  # Spoolman stores text as JSON
     except ValueError:
         return None
-    if data in (None, ""):
+    if data is None or (isinstance(data, str) and not data.strip()):
         return {}
     if not isinstance(data, dict):
         return None
@@ -1154,7 +1154,13 @@ def _same(first: list[str], second: list[str]) -> bool:
     if len(second) == 1:
         second = second * len(first)
     return len(first) == len(second) and all(
-        a == b or (_number(a) is not None and _number(a) == _number(b)) for a, b in zip(first, second))
+        a == b or (_six_digits(a) is not None and _six_digits(a) == _six_digits(b)) for a, b in zip(first, second))
+
+
+def _six_digits(text: str) -> str | None:
+    """A number as OrcaSlicer keeps it, 6 significant digits ("0.03256789" is kept as 0.0325679)."""
+    number = _number(text)
+    return None if number is None else f"{number:.6g}"
 
 
 def edited_changes() -> tuple[str, dict]:
@@ -1204,10 +1210,13 @@ def send_changes(name: str, changes: dict, snapshot: dict) -> str:
                           {"name": "Orca settings", "field_type": "text"})
         # Last, so it beats any other section that matches the printer.
         data[target] = {**data.pop(target, {}), **section}
-        spoolman_call("PATCH", f"filament/{int(fid)}", {"extra": {ORCA_SETTINGS_FIELD: json.dumps(json.dumps(data))}})
+        # Every field goes back, as some Spoolman versions replace the whole extra map on a PATCH.
+        extra = {**(filament.get("extra") or {}), ORCA_SETTINGS_FIELD: json.dumps(json.dumps(data))}
+        spoolman_call("PATCH", f"filament/{int(fid)}", {"extra": extra})
     # Always, so the presets also take the values Spoolman kept. OrcaSlicer's reload keeps every
     # unsaved edit, so a kept setting's edit stays unsaved for the user to send again or discard.
-    load_spools_synced(snapshot)
+    result = load_spools_synced(snapshot) or {}
+    rebuild_error = (result.get("profiles") or {}).get("error") if result.get("ok") else result.get("error")
     notes = []
     if sent:
         notes.append(f"Sent {', '.join(sent)} to Spoolman for {name}.")
@@ -1217,6 +1226,8 @@ def send_changes(name: str, changes: dict, snapshot: dict) -> str:
     if other:
         notes.append(f"Not sent: {', '.join(other)}. Spoolman's {ORCA_SETTINGS_FIELD} field holds only "
                      "calibration settings; colour, vendor, material and name come from its own fields.")
+    if rebuild_error:
+        notes.append(f"The presets were not rebuilt: {rebuild_error}")
     return " ".join(notes)
 
 

@@ -157,6 +157,34 @@ class SendTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "no longer a Spooler preset"):
             self.send(filament_flow_ratio=("0.95", "0.98"))
 
+    def test_other_extra_fields_go_back_unchanged(self):
+        # Some Spoolman versions replace the whole extra map on a PATCH.
+        self.filament["extra"]["start_gcode"] = json.dumps("M117 hi")
+        self.send(filament_flow_ratio=("0.95", "0.98"))
+        extras = [body["extra"] for method, _, body in self.calls if method == "PATCH"]
+        self.assertEqual(extras[0]["start_gcode"], json.dumps("M117 hi"))
+
+    def test_blank_field_is_empty(self):
+        self.filament["extra"]["orca_settings"] = json.dumps("")
+        self.assertEqual(sp.orca_settings_data(self.filament), {})
+        self.send(filament_flow_ratio=("0.95", "0.98"))
+        self.assertEqual(self.written(), [{U1: {"filament_flow_ratio": "0.95"}}])
+
+    def test_failed_rebuild_is_reported(self):
+        sp.load_spools_synced = lambda snapshot: {"ok": True, "profiles": {"count": 0, "error": "refused"}}
+        text = self.send(filament_flow_ratio=("0.95", "0.98"))
+        self.assertIn("Sent filament_flow_ratio", text)
+        self.assertIn("The presets were not rebuilt: refused", text)
+        sp.load_spools_synced = lambda snapshot: {"ok": False, "error": "Could not reach Spoolman"}
+        self.assertIn("The presets were not rebuilt: Could not reach Spoolman",
+                      self.send(filament_flow_ratio=("0.95", "0.98")))
+
+    def test_more_digits_than_orcaslicer_keeps_is_not_a_conflict(self):
+        # OrcaSlicer keeps 6 significant digits, so the preset holds 0.0325679 for 0.03256789.
+        self.filament["extra"]["orca_settings"] = stored({"*": {"pressure_advance": "0.03256789"}})
+        text = self.send(pressure_advance=("0.035", "0.0325679"))
+        self.assertIn("Sent pressure_advance", text)
+
 
 class StartTest(unittest.TestCase):
     def setUp(self):
