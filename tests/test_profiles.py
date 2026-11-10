@@ -232,6 +232,8 @@ class SnapshotTest(unittest.TestCase):
         self.assertEqual((parent["vendor"], parent["type"], parent["printers"]), ("Snapmaker", "PLA", [U1]))
         self.assertFalse(any(re.search(r"@base| base$", p["name"]) for p in snap["parents"]))
         self.assertEqual(sp._ui_snap["host"], "http://10.25.1.83")
+        self.assertEqual(snap["current"], [("Generic PLA @System", True)] * 4)
+        self.assertEqual(sp.profile_snapshot()["gen"], snap["gen"] + 1)
 
     def test_selected_printer_without_host_is_a_target(self):
         orca.host.preset_bundle = lambda: Bundle(self.root, selected=5)

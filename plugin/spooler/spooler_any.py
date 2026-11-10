@@ -9,6 +9,7 @@
 # version = "0.9.1"
 # ///
 
+import asyncio
 import base64
 import ftplib
 import hashlib
@@ -955,11 +956,16 @@ def profile_snapshot() -> dict | None:
             _parent_cache.update(key=key, parents=parent_candidates(filaments))
         printers = target_printers(bundle)
         selected = _root_printer(bundle.printers, bundle.printers.selected_preset())
+        current = bundle.current_filament_preset_names()
         snap = {"names": set(filaments.preset_names()), "parents": _parent_cache["parents"],
                 "printers": printers, "selected": selected,
                 "folder": profile_user_folder(bundle, _orca_data_dir()),
                 "host": moon_base(bundle.full_config_value("print_host")),
-                "slots": len(bundle.current_filament_preset_names())}
+                "slots": len(current),
+                # Each slot's preset and whether it is a system one, as OrcaSlicer's own sync picks.
+                "current": [(name, bool(getattr(filaments.find_preset(name), "is_system", False)))
+                            for name in current],
+                "gen": _ui_snap.get("gen", 0) + 1}
     except Exception:
         log.exception("Could not read the presets")
         return None
@@ -6281,8 +6287,9 @@ def slot_plan(trays: list[dict], slots: int, names: set[str]) -> tuple[list, lis
     return plan, missing
 
 
-def load_printer_filaments(snap: dict) -> str:
-    """Select the matching profile for each plate slot. Runs on the Script worker."""
+def sync_for(snap: dict) -> set[str]:
+    """Sync the presets from Spoolman for the selected printer and return every preset name a slot
+    can take. Raises RuntimeError saying what is missing. Runs on the Script worker."""
     if not snap:
         raise RuntimeError(f"Open the {PLUGIN_NAME} tab once, then run this again.")
     if not snap.get("host"):
@@ -6293,7 +6300,12 @@ def load_printer_filaments(snap: dict) -> str:
     state = profile_sync(result["spools"], snap)
     if state["error"]:
         raise RuntimeError("The filament presets could not be updated: " + state["error"])
-    names = snap["names"] | {PROFILE_PREFIX + n for n in state["names"].values()}
+    return snap["names"] | {PROFILE_PREFIX + n for n in state["names"].values()}
+
+
+def load_printer_filaments(snap: dict) -> str:
+    """Select the matching profile for each plate slot. Runs on the Script worker."""
+    names = sync_for(snap)
     plan, missing = slot_plan(printer_trays(snap["host"]), snap["slots"], names)
     done, failed = 0, []
     for slot, name in plan:
@@ -6310,6 +6322,23 @@ def load_printer_filaments(snap: dict) -> str:
     if failed:
         text += " Could not change slot(s) " + ", ".join(map(str, failed)) + "."
     return text
+
+
+def keep_plan(trays: list[dict], slots: int, names: set[str], current: list, gen: int,
+              seen: dict) -> list[tuple[int, str]]:
+    """The slots Keep Slots Synced (re)assigns: those whose lane's spool changed since the last pass,
+    and those holding a system preset (what OrcaSlicer's own Sync filaments picks) in a snapshot
+    newer than the last pass. User presets are left alone. Updates seen: {slot: (spool, gen)}."""
+    plan, _ = slot_plan(trays, slots, names)
+    changes = []
+    for slot, name in plan:
+        spool = trays[slot - 1].get("spool_id")
+        held, system = current[slot - 1] if slot <= len(current) else ("", False)
+        last = seen.get(slot)
+        if held != name and (last is None or last[0] != spool or (system and gen > last[1])):
+            changes.append((slot, name))
+        seen[slot] = (spool, gen)
+    return changes
 
 
 SNAPSHOT_EVENTS = ("PresetSelected", "PresetSaved", "ProjectOpened", "NewProject")
@@ -6340,6 +6369,52 @@ class SpoolerLoadFilaments(orca.script.ScriptPluginCapabilityBase):
             return orca.ExecutionResult.failure(orca.PluginResult.RecoverableError, str(exc))
 
 
+_keep: dict = {"run": None}
+
+
+class SpoolerKeepSlots(orca.script.ScriptPluginCapabilityBase):
+    """Plugins > Run: keep the plate's filament slots on what each printer lane holds, until run
+    again. OrcaSlicer only lets a running Plugins > Run action change slots, so this one stays."""
+
+    def get_name(self):
+        return f"{PLUGIN_NAME}: Keep Slots Synced"
+
+    async def execute(self):
+        if _keep["run"] is not None:
+            _keep["run"] = None
+            return orca.ExecutionResult.success("Stopped keeping the filament slots synced.")
+        try:
+            names = sync_for(dict(_ui_snap))
+        except Exception as exc:
+            return orca.ExecutionResult.failure(orca.PluginResult.RecoverableError, str(exc))
+        run = _keep["run"] = object()
+        seen, synced = {}, time.monotonic()
+        try:
+            while _keep["run"] is run:
+                snap = dict(_ui_snap)
+                try:
+                    if time.monotonic() - synced > REFRESH_SECS:
+                        names, synced = sync_for(snap), time.monotonic()
+                    trays = printer_trays(snap["host"])
+                    for slot, name in keep_plan(trays, snap["slots"], names, snap.get("current") or [],
+                                                snap.get("gen", 0), seen):
+                        try:
+                            orca.host.preset.filament.begin_update(slot, name).commit()
+                            # The selection refreshed the snapshot before the slot changed, so it
+                            # still shows the old preset: only a later snapshot may count.
+                            seen[slot] = (seen[slot][0], _ui_snap.get("gen", 0))
+                        except Exception as exc:
+                            log.warning("Could not load %s into slot %d: %s", name, slot, exc)
+                    _report("Keep Slots Synced", None)
+                except Exception as exc:
+                    _report("Keep Slots Synced", str(exc))
+                await asyncio.sleep(MOON_POLL)
+        finally:
+            if _keep["run"] is run:
+                _keep["run"] = None
+        return orca.ExecutionResult.success("Stopped keeping the filament slots synced.")
+
+
 @orca.plugin
 class SpoolerPlugin(orca.base):
     def register_capabilities(self):
@@ -6350,3 +6425,4 @@ class SpoolerPlugin(orca.base):
         if _SLICING:
             orca.register_capability(SpoolerFilamentCheck)
         orca.register_capability(SpoolerLoadFilaments)
+        orca.register_capability(SpoolerKeepSlots)

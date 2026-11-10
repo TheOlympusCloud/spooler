@@ -1,3 +1,4 @@
+import asyncio
 import json
 import types
 import unittest
@@ -298,6 +299,99 @@ class LoadTest(unittest.TestCase):
             sp.load_printer_filaments({})
         with self.assertRaises(RuntimeError):
             sp.load_printer_filaments({"host": "", "slots": 1, "names": set()})
+
+
+TRAYS = [{"profile": "_local/spooler/A", "tray_type": "PLA", "spool_id": 3},
+         {"profile": "_local/spooler/B", "tray_type": "PLA", "spool_id": 4},
+         {"id": "2"},
+         {"profile": "_local/spooler/C", "tray_type": "PLA", "spool_id": 6}]
+NAMES = {"_local/spooler/A", "_local/spooler/B", "_local/spooler/C", "_local/spooler/D"}
+GENERIC = ("Generic PLA @System", True)
+IN_SYNC = [("_local/spooler/A", False), ("_local/spooler/B", False), GENERIC, ("_local/spooler/C", False)]
+
+
+class KeepPlanTest(unittest.TestCase):
+    def setUp(self):
+        self.seen = {}
+
+    def plan(self, current, gen=1, trays=TRAYS):
+        return sp.keep_plan(trays, 4, NAMES, current, gen, self.seen)
+
+    def test_first_pass_assigns_every_lane(self):
+        self.assertEqual(self.plan([GENERIC] * 4),
+                         [(1, "_local/spooler/A"), (2, "_local/spooler/B"), (4, "_local/spooler/C")])
+
+    def test_slots_already_right_are_left_alone(self):
+        self.assertEqual(self.plan(IN_SYNC), [])
+        self.assertEqual(self.plan(IN_SYNC, gen=2), [])
+
+    def test_lane_change_reassigns_even_a_user_preset(self):
+        self.plan(IN_SYNC)
+        trays = [dict(TRAYS[0]), dict(TRAYS[1], spool_id=5, profile="_local/spooler/D"), TRAYS[2], TRAYS[3]]
+        current = [IN_SYNC[0], ("My PLA", False), IN_SYNC[2], IN_SYNC[3]]
+        self.assertEqual(self.plan(current, gen=2, trays=trays), [(2, "_local/spooler/D")])
+
+    def test_generic_preset_from_orca_sync_is_replaced_once(self):
+        self.plan(IN_SYNC)
+        current = [GENERIC] + IN_SYNC[1:]
+        self.assertEqual(self.plan(current, gen=2), [(1, "_local/spooler/A")])
+        # The same snapshot again (OrcaSlicer hasn't reported the change): no second try.
+        self.assertEqual(self.plan(current, gen=2), [])
+
+    def test_user_preset_is_kept(self):
+        self.plan(IN_SYNC)
+        self.assertEqual(self.plan([("My PLA", False)] + IN_SYNC[1:], gen=2), [])
+
+
+class KeepRunTest(unittest.TestCase):
+    def setUp(self):
+        self.originals = (sp.sync_for, sp.printer_trays, sp.MOON_POLL)
+        self.calls = []
+        self.slots = [GENERIC] * 4
+        test = self
+
+        class Tx:
+            def __init__(self, slot, name):
+                test.calls.append((slot, name))
+                self.slot, self.name = slot, name
+                # OrcaSlicer fires PresetSelected, refreshing the snapshot, before this slot changes.
+                sp._ui_snap.update(current=list(test.slots), gen=sp._ui_snap["gen"] + 1)
+
+            def commit(self):
+                test.slots[self.slot - 1] = (self.name, False)
+
+        orca.host.preset.filament = types.SimpleNamespace(begin_update=Tx)
+        sp.sync_for = lambda snap: NAMES
+        sp.printer_trays = lambda base: TRAYS
+        sp.MOON_POLL = 0.01
+        sp._ui_snap.clear()
+        sp._ui_snap.update(host="http://cc", slots=4, names=set(), current=[GENERIC] * 4, gen=1)
+
+    def tearDown(self):
+        sp.sync_for, sp.printer_trays, sp.MOON_POLL = self.originals
+        sp._ui_snap.clear()
+
+    def test_running_it_again_stops_it(self):
+        async def scenario():
+            first = asyncio.ensure_future(sp.SpoolerKeepSlots().execute())
+            await asyncio.sleep(0.1)
+            stopped = await sp.SpoolerKeepSlots().execute()
+            return stopped, await asyncio.wait_for(first, 1)
+
+        stopped, ended = asyncio.run(scenario())
+        # Several passes ran, but each lane was assigned once.
+        self.assertEqual(self.calls, [(1, "_local/spooler/A"), (2, "_local/spooler/B"), (4, "_local/spooler/C")])
+        self.assertEqual(stopped[0], "success")
+        self.assertEqual(ended[0], "success")
+
+    def test_not_ready_fails_at_once(self):
+        def not_ready(snap):
+            raise RuntimeError("The selected printer preset has no host address.")
+
+        sp.sync_for = not_ready
+        result = asyncio.run(sp.SpoolerKeepSlots().execute())
+        self.assertEqual(result[0], "failure")
+        self.assertIsNone(sp._keep["run"])
 
 
 class PlanTest(unittest.TestCase):
