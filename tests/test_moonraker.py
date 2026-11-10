@@ -121,6 +121,117 @@ class SingleTest(unittest.TestCase):
         self.assertEqual(doc["print"]["vt_tray"], {"id": "254"})
 
 
+def lane(index, spool_id=None, material="PLA", colour="", vendor="", name=""):
+    """One lane_data entry, shaped like the ones AFC writes."""
+    return {"color": colour, "material": material, "vendor_name": vendor, "name": name, "bed_temp": 60,
+            "nozzle_temp": 220, "scan_time": "", "td": "", "lane": str(index), "extruder_index": 0,
+            "spool_id": spool_id, "weight": 500.0, "initial_weight": 1000.0}
+
+
+# T2 is empty; T3 reports no spool id, so it is matched by vendor, material and colour.
+LANES = {"T0": lane(0, 3, colour="#F4C032", vendor="Snapmaker", name="PLA SnapSpeed Yellow"),
+         "T1": lane(1, 4, colour="#E72F1D", vendor="Snapmaker", name="PLA SnapSpeed Red"),
+         "T2": lane(2, material=""),
+         "T3": lane(3, colour="#E2DEDB", vendor="Snapmaker", name="PLA SnapSpeed White")}
+
+
+class LaneTest(unittest.TestCase):
+    def setUp(self):
+        sp._profiles["names"] = names()
+
+    def units(self, lanes):
+        doc, heads = sp.moon_report({}, 18, SPOOLS, U1, lanes)
+        self.assertFalse(heads)
+        self.assertNotIn("vt_tray", doc["print"])
+        return doc["print"]["ams"]["ams"]
+
+    def test_lanes_use_the_spool_id_each_lane_reports(self):
+        units = self.units(LANES)
+        self.assertEqual(len(units), 1)
+        trays = units[0]["tray"]
+        self.assertEqual([t.get("spool_id") for t in trays], [3, 4, None, 6])
+        self.assertEqual(trays[2], {"id": "2"})
+        self.assertEqual(trays[0]["tray_color"], "F4C032FF")
+        self.assertEqual(trays[0]["profile"], "_local/spooler/Snapmaker PLA SnapSpeed Yellow @Snapmaker U1")
+
+    def test_unknown_spool_id_matches_by_colour(self):
+        trays = self.units({"T0": lane(0, 999, colour="#F4C032", vendor="Snapmaker")})[0]["tray"]
+        self.assertEqual(trays[0]["spool_id"], 3)
+
+    def test_unmatched_lane_keeps_what_the_printer_says(self):
+        trays = self.units({"T0": lane(0, material="TPU", colour="#123456", vendor="Acme")})[0]["tray"]
+        self.assertEqual((trays[0]["spool_id"], trays[0]["profile"]), (None, ""))
+        self.assertEqual((trays[0]["tray_type"], trays[0]["tray_color"]), ("TPU", "123456FF"))
+        self.assertEqual(trays[0]["tray_sub_brands"], "Acme TPU")
+
+    def test_four_lanes_per_unit(self):
+        units = self.units({"T5": lane(5, 34, colour="#FFFF00", vendor="3D Procer")})
+        self.assertEqual([u["id"] for u in units], ["0", "1"])
+        self.assertEqual(units[0]["tray"], [{"id": str(i)} for i in range(4)])
+        self.assertEqual(units[1]["tray"][1]["id"], "1")
+        self.assertEqual(units[1]["tray"][1]["spool_id"], 34)
+
+    def test_live_state_shows_lanes(self):
+        doc, _ = sp.moon_report({}, None, SPOOLS, U1, LANES)
+        sp._live["printers"].clear()
+        sp.live_apply("auto-cc", "Centauri", doc, link="auto-cc")
+        snap = sp.live_snapshot()["printers"][0]
+        sp._live["printers"].clear()
+        self.assertFalse(snap["heads"])
+        trays = snap["units"][0]["trays"]
+        self.assertEqual([t["spool"] for t in trays], [3, 4, None, 6])
+        self.assertTrue(trays[2]["empty"])
+
+
+class LanePollTest(unittest.TestCase):
+    def setUp(self):
+        self.original = sp._moon_get
+        sp._spool_cache["spools"] = SPOOLS
+
+    def tearDown(self):
+        sp._moon_get = self.original
+        sp._spool_cache["spools"] = []
+
+    def answer(self, lanes, status=None):
+        # Current Moonraker answers {} for objects the printer doesn't have, older ones leave them out.
+        status = {"print_task_config": {}, "filament_detect": {}} if status is None else status
+
+        def get(base, path):
+            if "lane_data" in path:
+                if lanes is None:
+                    raise sp.urllib.error.HTTPError(base + path, 404, "Namespace 'lane_data' not found", {}, None)
+                return {"namespace": "lane_data", "key": None, "value": lanes}
+            if path == "/server/spoolman/spool_id":
+                return {"spool_id": 6}
+            return {"status": status}
+
+        sp._moon_get = get
+
+    def test_lanes_before_moonrakers_active_spool(self):
+        self.answer(LANES)
+        doc, heads = sp.moon_poll("http://cc")
+        self.assertFalse(heads)
+        self.assertEqual([t.get("spool_id") for t in doc["print"]["ams"]["ams"][0]["tray"]], [3, 4, None, 6])
+
+    def test_no_lane_data_uses_the_active_spool(self):
+        for status in (None, {}):
+            self.answer(None, status)
+            doc, _ = sp.moon_poll("http://sv06")
+            self.assertEqual(doc["print"]["vt_tray"]["spool_id"], 6)
+
+    def test_lane_data_without_lanes_uses_the_active_spool(self):
+        self.answer({"x": {"material": "PLA", "color": "#FFFFFF"}})
+        doc, _ = sp.moon_poll("http://cc")
+        self.assertEqual(doc["print"]["vt_tray"]["spool_id"], 6)
+        self.assertEqual([t.get("spool_id") for t in sp.printer_trays("http://cc")], [6])
+
+    def test_printer_trays_in_slot_order_across_units(self):
+        self.answer({"a": lane(0, 3, colour="#F4C032"), "b": lane(5, 34, colour="#FFFF00")})
+        trays = sp.printer_trays("http://cc")
+        self.assertEqual(len(trays), 8)
+        self.assertEqual((trays[0]["spool_id"], trays[5]["spool_id"]), (3, 34))
+
+
 class ProbeTest(unittest.TestCase):
     def test_is_moonraker(self):
         original = sp._moon_get

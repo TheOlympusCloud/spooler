@@ -1629,9 +1629,25 @@ def _spool_by_id(spool_id: object, spools: list[dict]) -> dict | None:
     return next((s for s in spools if str(s.get("id")) == str(spool_id) and not s.get("archived")), None)
 
 
+def slot_tray(slot: int, spool_id: object, uid: str, vendor: str, kind: str, rgba: str, label: str,
+              spools: list[dict], target: str) -> dict:
+    """A Bambu-shaped tray for one printer slot, matched to a Spoolman spool: by the spool id the
+    printer reports, else by RFID tag, else by vendor, material and colour."""
+    spool = _spool_by_id(spool_id, spools)
+    if spool is None and uid:
+        spool = match_spool({"tag_uid": uid}, spools)
+    if spool is None and kind and rgba:
+        found = match_spools({"preset": "", "vendor": vendor, "material": kind, "colour": rgba[:6]}, spools)
+        spool = found[0] if found else None
+    if spool is not None:
+        tray = _spool_tray(slot, spool, target, tag_uid=uid)
+        return dict(tray, tray_color=rgba) if rgba else tray
+    return {"id": str(slot), "tray_type": kind, "tray_color": rgba, "tray_sub_brands": label,
+            "tag_uid": uid, "remain": None, "spool_id": None, "profile": ""}
+
+
 def head_tray(index: int, config: dict, detect: dict, spools: list[dict], target: str = "") -> dict:
-    """A Bambu-shaped tray for one Snapmaker U1 toolhead, matched to a Spoolman spool: by the
-    spool id the printer reports, else by RFID tag, else by vendor, material and colour."""
+    """A Bambu-shaped tray for one Snapmaker U1 toolhead."""
     if not _list_at(config.get("filament_exist"), index):
         return {"id": str(index)}
     kind = str(_list_at(config.get("filament_type"), index) or "").strip()
@@ -1639,21 +1655,33 @@ def head_tray(index: int, config: dict, detect: dict, spools: list[dict], target
     vendor = str(_list_at(config.get("filament_vendor"), index) or "").strip()
     rgba = str(_list_at(config.get("filament_color_rgba"), index) or "").lstrip("#").upper()
     uid = _card_uid(_list_at((detect or {}).get("info"), index))
-    spool = _spool_by_id(_list_at(config.get("filament_spool_id"), index), spools)
-    if spool is None and uid:
-        spool = match_spool({"tag_uid": uid}, spools)
-    if spool is None and kind and rgba:
-        found = match_spools({"preset": "", "vendor": vendor, "material": kind, "colour": rgba[:6]}, spools)
-        spool = found[0] if found else None
-    if spool is not None:
-        tray = _spool_tray(index, spool, target, tag_uid=uid)
-        return dict(tray, tray_color=rgba) if rgba else tray
     label = " ".join(part for part in (vendor, kind, "" if sub.upper() in ("", "NONE", "BASIC") else sub) if part)
-    return {"id": str(index), "tray_type": kind, "tray_color": rgba, "tray_sub_brands": label,
-            "tag_uid": uid, "remain": None, "spool_id": None, "profile": ""}
+    return slot_tray(index, _list_at(config.get("filament_spool_id"), index), uid, vendor, kind, rgba,
+                     label, spools, target)
 
 
-def moon_report(status: dict, active_spool: object, spools: list[dict], target: str = "") -> tuple[dict, bool]:
+def lane_units(lanes: dict, spools: list[dict], target: str) -> list[dict]:
+    """Moonraker lane_data, as AFC, Happy Hare and other MMU integrations write it, as Bambu-shaped
+    units of four trays. Each entry's "lane" is its 0-based slot; an empty material is an empty lane."""
+    trays: dict = {}
+    for entry in lanes.values():
+        index = _int(entry.get("lane")) if isinstance(entry, dict) else -1
+        if index < 0:
+            continue
+        trays[index] = {"id": str(index % 4)}
+        kind = str(entry.get("material") or "").strip()
+        if kind:
+            colour = _hex6(entry.get("color"))
+            vendor = str(entry.get("vendor_name") or "").strip()
+            label = " ".join(part for part in (vendor, str(entry.get("name") or "").strip() or kind) if part)
+            trays[index] = slot_tray(index % 4, entry.get("spool_id"), "", vendor, kind,
+                                     colour + "FF" if colour else "", label, spools, target)
+    return [{"id": str(unit), "tray": [trays.get(unit * 4 + i, {"id": str(i)}) for i in range(4)]}
+            for unit in range(max(trays, default=-1) // 4 + 1)]
+
+
+def moon_report(status: dict, active_spool: object, spools: list[dict], target: str = "",
+                lanes: dict | None = None) -> tuple[dict, bool]:
     """(Bambu-shaped report, has toolheads) from Moonraker's answers."""
     config = status.get("print_task_config")
     if isinstance(config, dict) and isinstance(config.get("filament_exist"), list):
@@ -1661,20 +1689,36 @@ def moon_report(status: dict, active_spool: object, spools: list[dict], target: 
         heads = len(config["filament_exist"])
         trays = [head_tray(i, config, detect, spools, target) for i in range(heads)]
         return {"print": {"ams": {"ams": [{"id": "0", "tray": trays}]}}}, True
+    if lanes:
+        return {"print": {"ams": {"ams": lane_units(lanes, spools, target)}}}, False
     spool = _spool_by_id(active_spool, spools)
     ext = _spool_tray(MOON_EXT, spool, target) if spool else {"id": str(MOON_EXT)}
     return {"print": {"vt_tray": ext}}, False
 
 
+def moon_lanes(base: str) -> dict:
+    """The lanes an MMU integration wrote to Moonraker's lane_data namespace, or {}."""
+    try:
+        lanes = _moon_get(base, "/server/database/item?namespace=lane_data").get("value")
+    except urllib.error.HTTPError:
+        return {}  # No lane_data namespace: nothing on the printer writes it.
+    # The format isn't standard across tools: an entry without a lane number can't be placed.
+    return {key: entry for key, entry in (lanes.items() if isinstance(lanes, dict) else ())
+            if isinstance(entry, dict) and _int(entry.get("lane")) >= 0}
+
+
 def moon_poll(base: str) -> tuple[dict, bool]:
     status = _moon_get(base, "/printer/objects/query?print_task_config&filament_detect").get("status") or {}
-    active = None
-    if "print_task_config" not in status:
-        try:
-            active = _moon_get(base, "/server/spoolman/spool_id").get("spool_id")
-        except urllib.error.HTTPError:
-            active = None  # Moonraker without its Spoolman integration
-    return moon_report(status, active, _spool_cache["spools"] or [], target_for_host(base))
+    active = lanes = None
+    # Moonraker answers {} for an object the printer doesn't have (only the U1 has this one).
+    if not status.get("print_task_config"):
+        lanes = moon_lanes(base)
+        if not lanes:
+            try:
+                active = _moon_get(base, "/server/spoolman/spool_id").get("spool_id")
+            except urllib.error.HTTPError:
+                active = None  # Moonraker without its Spoolman integration
+    return moon_report(status, active, _spool_cache["spools"] or [], target_for_host(base), lanes)
 
 
 def is_moonraker(base: str) -> bool:
@@ -6218,9 +6262,9 @@ if _SLICING:
 
 def printer_trays(base: str) -> list[dict]:
     """The printer's slots in slicer order, each with its matched profile."""
-    doc, heads = moon_poll(base)
-    report = doc["print"]
-    return report["ams"]["ams"][0]["tray"] if heads else [report["vt_tray"]]
+    report = moon_poll(base)[0]["print"]
+    units = (report.get("ams") or {}).get("ams")
+    return [tray for unit in units for tray in unit["tray"]] if units else [report["vt_tray"]]
 
 
 def slot_plan(trays: list[dict], slots: int, names: set[str]) -> tuple[list, list]:
